@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SeniorOS Essential</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    :root {
+      --font-scale: 1;
+      --border-style: none;
+      --theme-bg: #cbd5e1;
+      --theme-phone-bg: #ffffff;
+      --theme-text: #0f172a;
+      --theme-panel-bg: rgba(0, 0, 0, 0.05);
+      --theme-panel-border: none;
+      --theme-input-bg: rgba(255, 255, 255, 0.8);
+      --theme-subtext: #475569;
+    }
+
+    body.bold-text * { font-weight: 900 !important; }
+    
+    body.high-contrast {
+      --border-style: 2px solid #000000;
+      background: #ffffff !important;
+    }
+
+    body.theme-nero {
+      --theme-bg: #000000;
+      --theme-phone-bg: #0a0a0c;
+      --theme-text: #ffffff;
+      --border-style: none;
+      --theme-panel-bg: rgba(255, 255, 255, 0.07);
+      --theme-input-bg: rgba(0, 0, 0, 0.6);
+      --theme-subtext: #a1a1aa;
+    }
+    body.theme-bianco {
+      --theme-bg: #cbd5e1;
+      --theme-phone-bg: #ffffff;
+      --theme-text: #0f172a;
+      --border-style: none;
+      --theme-panel-bg: rgba(0, 0, 0, 0.05);
+      --theme-input-bg: rgba(255, 255, 255, 0.8);
+      --theme-subtext: #475569;
+    }
+    body.theme-blu {
+      --theme-bg: #0284c7;
+      --theme-phone-bg: #0369a1;
+      --theme-text: #ffffff;
+      --border-style: none;
+      --theme-panel-bg: rgba(255, 255, 255, 0.1);
+      --theme-input-bg: rgba(0, 0, 0, 0.3);
+      --theme-subtext: #e0f2fe;
+    }
+    body.theme-giallo {
+      --theme-bg: #fef08a;
+      --theme-phone-bg: #fde047;
+      --theme-text: #000000;
+      --border-style: none;
+      --theme-panel-bg: rgba(0, 0, 0, 0.06);
+      --theme-input-bg: rgba(255, 255, 255, 0.6);
+      --theme-subtext: #334155;
+    }
+    body.theme-fucsia {
+      --theme-bg: #be185d;
+      --theme-phone-bg: #9d174d;
+      --theme-text: #ffffff;
+      --border-style: none;
+      --theme-panel-bg: rgba(255, 255, 255, 0.1);
+      --theme-input-bg: rgba(0, 0, 0, 0.3);
+      --theme-subtext: #fce7f3;
+    }
+    body.theme-grigio {
+      --theme-bg: #334155;
+      --theme-phone-bg: #1e293b;
+      --theme-text: #ffffff;
+      --border-style: none;
+      --theme-panel-bg: rgba(255, 255, 255, 0.07);
+      --theme-input-bg: rgba(0, 0, 0, 0.4);
+      --theme-subtext: #94a3b8;
+    }
+    body.theme-verdino {
+      --theme-bg: #86efac;
+      --theme-phone-bg: #4ade80;
+      --theme-text: #052e16;
+      --border-style: none;
+      --theme-panel-bg: rgba(0, 0, 0, 0.06);
+      --theme-input-bg: rgba(255, 255, 255, 0.6);
+      --theme-subtext: #14532d;
+    }
+    body.theme-azzurro {
+      --theme-bg: #bae6fd;
+      --theme-phone-bg: #38bdf8;
+      --theme-text: #0c4a6e;
+      --border-style: none;
+      --theme-panel-bg: rgba(0, 0, 0, 0.06);
+      --theme-input-bg: rgba(255, 255, 255, 0.6);
+      --theme-subtext: #0369a1;
+    }
+
+    html, body {
+      background: var(--theme-phone-bg);
+      color: var(--theme-text);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #phone-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      background: var(--theme-phone-bg);
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 22px;
+      font-size: calc(13px * var(--font-scale));
+      font-weight: 700;
+      background: var(--theme-panel-bg);
+      border-bottom: var(--border-style);
+      flex-shrink: 0;
+      border-radius: 0;
+    }
+
+    .torch-btn {
+      background: #3b82f6;
+      border: none;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .torch-btn.active { background: #eab308; color: #000; }
+
+    .home-screen {
+      flex: 1;
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      height: 100%;
+      overflow: hidden;
+      align-content: center;
+    }
+
+    .home-screen.grid-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; padding: 24px; max-width: 600px; }
+    .home-screen.grid-2 { grid-template-columns: 1fr; grid-template-rows: repeat(2, 1fr); padding: 20px; max-width: 600px; }
+    .home-screen.grid-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); max-width: 800px; }
+    .home-screen.grid-8 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); gap: 12px; padding: 16px; max-width: 1200px; }
+
+    @media (max-width: 768px) {
+      .home-screen.grid-8 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
+    }
+
+    .app-icon {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      color: #ffffff;
+      border-radius: 24px;
+      height: 100%;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      border: var(--border-style);
+      transition: transform 0.1s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .app-icon:active { transform: scale(0.97); }
+
+    .icon-box {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .icon-box svg { width: 40%; height: 40%; fill: #ffffff; }
+
+    .app-label-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 12px 8px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(2px);
+      text-align: center;
+      font-weight: 800;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grid-1 .app-label-overlay { font-size: calc(20px * var(--font-scale)); padding: 16px; }
+    .grid-2 .app-label-overlay { font-size: calc(16px * var(--font-scale)); padding: 14px; }
+    .grid-4 .app-label-overlay { font-size: calc(13px * var(--font-scale)); }
+    .grid-8 .app-label-overlay { font-size: calc(10px * var(--font-scale)); padding: 6px; }
+
+    .bg-phone { background: #059669; }
+    .bg-messages { background: #2563eb; }
+    .bg-sos { background: #dc2626; }
+    .bg-photos { background: #7c3aed; }
+    .bg-camera { background: #d97706; }
+    .bg-settings { background: #475569; }
+    .bg-access { background: #4f46e5; }
+    .bg-family { background: #e11d48; }
+    .bg-faq { background: #0d9488; }
+
+    .bottom-bar {
+      padding: 16px 20px 20px 20px;
+      background: var(--theme-panel-bg);
+      border-top: var(--border-style);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex-shrink: 0;
+      border-radius: 0;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page-nav-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      background: var(--theme-panel-bg);
+      border: var(--border-style);
+      color: var(--theme-text);
+      padding: 12px;
+      border-radius: 18px;
+      font-size: calc(13px * var(--font-scale));
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+    .page-indicator {
+      font-size: calc(13px * var(--font-scale));
+      font-weight: 800;
+      color: var(--theme-text);
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .super-dock { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .dock-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 10px;
+      border-radius: 22px;
+      color: #ffffff;
+      font-size: calc(13px * var(--font-scale));
+      font-weight: 900;
+      border: var(--border-style);
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .dock-sos { background: #dc2626; }
+
+    .window {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--theme-phone-bg);
+      color: var(--theme-text);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .window.active { transform: translateY(0); }
+
+    .window-header {
+      padding: 18px 22px;
+      background: var(--theme-panel-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: var(--border-style);
+      border-radius: 0;
+    }
+
+    .window-title { font-size: calc(17px * var(--font-scale)); font-weight: 800; }
+
+    .close-btn {
+      background: #dc2626;
+      border: none;
+      color: #ffffff;
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .window-content { flex: 1; overflow-y: auto; padding: 20px; border-radius: 0; max-width: 900px; margin: 0 auto; width: 100%; }
+
+    .section-title {
+      font-size: calc(12px * var(--font-scale));
+      text-transform: uppercase;
+      color: var(--theme-subtext);
+      margin: 20px 0 10px 4px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .group-box {
+      background: var(--theme-panel-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: var(--border-style);
+      padding: 8px;
+    }
+
+    .item-row {
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: var(--border-style);
+      min-height: 60px;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-title { font-size: calc(15px * var(--font-scale)); font-weight: 700; }
+
+    .toggle-switch {
+      width: 52px;
+      height: 30px;
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(150, 150, 150, 0.3);
+      border: var(--border-style);
+      border-radius: 15px;
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      transition: background 0.2s ease;
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .toggle-switch:checked { background: #10b981; }
+    .toggle-switch::before {
+      content: '';
+      position: absolute;
+      width: 24px; 
+      height: 24px;
+      border-radius: 50%;
+      top: 2px; 
+      left: 2px;
+      background: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease;
+    }
+    .toggle-switch:checked::before { transform: translateX(22px); }
+
+    .opt-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .opt-btn {
+      background: var(--theme-panel-bg);
+      border: var(--border-style);
+      color: var(--theme-text);
+      padding: 10px 16px;
+      border-radius: 16px;
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .opt-btn.active { background: var(--theme-text); color: var(--theme-phone-bg); }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 8px;
+    }
+    .theme-btn {
+      padding: 14px 6px;
+      border-radius: 18px;
+      border: 2px solid transparent;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      text-transform: capitalize;
+    }
+    .theme-btn.active { border-color: #f59e0b; }
+
+    .input-field {
+      width: 100%;
+      background: var(--theme-input-bg);
+      border: var(--border-style);
+      color: var(--theme-text);
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      margin-top: 8px;
+      outline: none;
+    }
+
+    .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .photo-card {
+      background: var(--theme-panel-bg);
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+      border: var(--border-style);
+      cursor: pointer;
+      position: relative;
+    }
+    .photo-card.is-emergency { border: 2px solid #ef4444; }
+    .emergency-badge {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: #ef4444; color: #fff;
+      font-size: 10px; font-weight: 900;
+      padding: 3px 8px; border-radius: 12px;
+    }
+    .photo-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: #3b82f6; margin: 0 auto 10px auto;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800; color: #ffffff;
+      background-size: cover; background-position: center;
+    }
+
+    .btn-danger { background: #ef4444 !important; color: #fff !important; }
+
+    .overlay-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .overlay-modal.active { display: flex; }
+
+    .modal-box {
+      background: var(--theme-phone-bg);
+      color: var(--theme-text);
+      padding: 28px;
+      border-radius: 24px;
+      border: var(--border-style);
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+
+    .modal-btns { display: flex; gap: 12px; margin-top: 24px; }
+    .btn-action {
+      flex: 1; padding: 14px; border-radius: 20px; border: none;
+      font-weight: 800; cursor: pointer; font-size: 14px;
+    }
+    .btn-confirm { background: #10b981; color: #fff; }
+    .btn-cancel { background: #ef4444; color: #fff; }
+
+    .faq-item {
+      background: var(--theme-panel-bg);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: var(--border-style);
+    }
+    .faq-q { font-weight: 800; color: #0284c7; margin-bottom: 6px; font-size: 14px; }
+    .faq-a { font-size: 13px; color: var(--theme-subtext); line-height: 1.5; }
+
+    .contact-card-manage {
+      background: var(--theme-panel-bg);
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      border: var(--border-style);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .contact-card-manage.is-emergency { border: 2px solid #ef4444; }
+
+    .empty-state {
+      text-align: center;
+      color: var(--theme-subtext);
+      padding: 40px 10px;
+      font-size: 14px;
+    }
+
+    #camera-video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+    .header-action-btn {
+      background: #10b981;
+      border: none;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body class="theme-nero">
+
+  <div id="phone-container">
+    <div class="status-bar">
+      <button class="torch-btn" id="torch-toggle" onclick="toggleTorch()">TORCIA</button>
+      <span id="clock">00:00</span>
+    </div>
+
+    <main class="home-screen grid-4" id="home-screen"></main>
+
+    <div class="bottom-bar">
+      <div class="page-nav-bottom">
+        <button class="nav-btn" id="btn-prev" onclick="changePage(-1)">◄ INDIETRO</button>
+        <span class="page-indicator" id="page-indicator">1 / 3</span>
+        <button class="nav-btn" id="btn-next" onclick="changePage(1)">AVANTI ►</button>
+      </div>
+
+      <div class="super-dock">
+        <button class="dock-btn bg-phone" onclick="callPrimaryEmergency()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          <span id="dock-call-label">CHIAMA</span>
+        </button>
+
+        <button class="dock-btn dock-sos" onclick="triggerSOS()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          <span>SOS 112</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="win-family" class="window">
+      <div class="window-header">
+        <span class="window-title">Chiamata Rapida Foto</span>
+        <button class="close-btn" onclick="closeWindow('win-family')">CHIUDI</button>
+      </div>
+      <div class="window-content">
+        <div class="photo-grid" id="family-photo-grid"></div>
+      </div>
+    </div>
+
+    <div id="win-photos" class="window">
+      <div class="window-header">
+        <span class="window-title">Galleria Foto</span>
+        <button class="close-btn" onclick="closeWindow('win-photos')">CHIUDI</button>
+      </div>
+      <div class="window-content">
+        <div class="photo-grid" id="gallery-grid"></div>
+      </div>
+    </div>
+
+    <div id="win-camera" class="window">
+      <div class="window-header">
+        <span class="window-title">Fotocamera</span>
+        <button class="close-btn" onclick="closeCameraWindow()">CHIUDI</button>
+      </div>
+      <div class="window-content" style="padding: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #000; max-width: none;">
+        <video id="camera-video" autoplay playsinline></video>
+        <canvas id="camera-canvas" style="display:none; width:100%; height:100%; object-fit:cover;"></canvas>
+        <div id="camera-msg" style="position: absolute; padding: 20px; text-align: center; color: #fff; font-weight: 700; display: none;">
+          Fotocamera non disponibile.
+        </div>
+        <div style="position: absolute; bottom: 35px; display: flex; gap: 18px; align-items: center;">
+          <button id="snap-btn" onclick="takePhoto()" style="width: 74px; height: 74px; border-radius: 50%; background: #ffffff; border: 4px solid #cbd5e1; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5);"></button>
+          <button id="retake-btn" onclick="retakePhoto()" style="display: none; padding: 12px 22px; background: #ef4444; color: #fff; border: none; font-weight: 800; border-radius: 16px; cursor: pointer;">RIFAI</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="win-faq" class="window">
+      <div class="window-header">
+        <span class="window-title">Guida OS per Parenti</span>
+        <button class="close-btn" onclick="closeWindow('win-faq')">CHIUDI</button>
+      </div>
+      <div class="window-content" id="faq-container"></div>
+    </div>
+
+    <div id="win-accessibility" class="window">
+      <div class="window-header">
+        <span class="window-title">Rubrica Contatti</span>
+        <button class="header-action-btn" onclick="openAddContactModal()">Nuovo</button>
+        <button class="close-btn" onclick="closeWindow('win-accessibility')">CHIUDI</button>
+      </div>
+      <div class="window-content">
+        <div class="section-title">Contatti Configurati</div>
+        <div id="contacts-management-list"></div>
+      </div>
+    </div>
+
+    <div id="win-settings" class="window">
+      <div class="window-header">
+        <span class="window-title">Impostazioni OS</span>
+        <button class="close-btn" onclick="closeWindow('win-settings')">CHIUDI</button>
+      </div>
+      <div class="window-content">
+        <div class="section-title">Colore Sfondo Sistema</div>
+        <div class="group-box">
+          <div class="theme-grid" id="theme-buttons-grid">
+            <button class="theme-btn active" style="background:#000; color:#fff;" onclick="setTheme('nero', this)">Nero</button>
+            <button class="theme-btn" style="background:#fff; color:#000;" onclick="setTheme('bianco', this)">Bianco</button>
+            <button class="theme-btn" style="background:#0284c7; color:#fff;" onclick="setTheme('blu', this)">Blu</button>
+            <button class="theme-btn" style="background:#fde047; color:#000;" onclick="setTheme('giallo', this)">Giallo</button>
+            <button class="theme-btn" style="background:#be185d; color:#fff;" onclick="setTheme('fucsia', this)">Fucsia</button>
+            <button class="theme-btn" style="background:#334155; color:#fff;" onclick="setTheme('grigio', this)">Grigio</button>
+            <button class="theme-btn" style="background:#4ade80; color:#000;" onclick="setTheme('verdino', this)">Verdino</button>
+            <button class="theme-btn" style="background:#38bdf8; color:#000;" onclick="setTheme('azzurro', this)">Azzurro</button>
+          </div>
+        </div>
+
+        <div class="section-title">Visione & Leggibilità</div>
+        <div class="group-box">
+          <div class="item-row">
+            <div>
+              <div class="item-title">Alto Contrasto</div>
+            </div>
+            <input type="checkbox" id="toggle-high-contrast" class="toggle-switch" onchange="toggleHighContrast(this)">
+          </div>
+          <div class="item-row">
+            <div>
+              <div class="item-title">Testo In Grassetto</div>
+            </div>
+            <input type="checkbox" id="toggle-bold-text" class="toggle-switch" onchange="toggleBoldText(this)">
+          </div>
+          <div class="item-row">
+            <div>
+              <div class="item-title">Dimensione Testo</div>
+            </div>
+            <div class="opt-btn-group" id="font-scale-group">
+              <button class="opt-btn active" onclick="setFontScale(1, this)">1x</button>
+              <button class="opt-btn" onclick="setFontScale(1.2, this)">1.2x</button>
+              <button class="opt-btn" onclick="setFontScale(1.4, this)">1.4x</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Layout Schermata</div>
+        <div class="group-box">
+          <div class="item-row">
+            <div>
+              <div class="item-title">Icone per Pagina</div>
+            </div>
+            <div class="opt-btn-group">
+              <button class="opt-btn btn-grid" onclick="setGrid(1, this)">1</button>
+              <button class="opt-btn btn-grid" onclick="setGrid(2, this)">2</button>
+              <button class="opt-btn btn-grid active" onclick="setGrid(4, this)">4</button>
+              <button class="opt-btn btn-grid" onclick="setGrid(8, this)">8</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale Aggiunta Contatto -->
+    <div id="add-contact-modal" class="overlay-modal">
+      <div class="modal-box">
+        <div style="font-weight:800; font-size:16px; margin-bottom:14px;">Nuovo Contatto</div>
+        <input type="text" id="contact-name" class="input-field" placeholder="Nome">
+        <input type="tel" id="contact-num" class="input-field" placeholder="Telefono">
+        <div style="margin-top:12px;">
+          <label style="font-size:12px; font-weight:700; color:var(--theme-subtext);">Foto contatto:</label>
+          <input type="file" id="contact-photo" class="input-field" accept="image/*" style="padding:8px;">
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; margin-top:16px;">
+          <input type="checkbox" id="contact-emergency" class="toggle-switch">
+          <span style="font-size:12px; font-weight:700; color:#ef4444;">Imposta come SOS principale</span>
+        </div>
+        <div class="modal-btns">
+          <button class="btn-action btn-cancel" onclick="closeAddContactModal()">ANNULLA</button>
+          <button class="btn-action btn-confirm" onclick="saveContact()">SALVA</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale Conferma Impostazioni -->
+    <div id="confirm-modal" class="overlay-modal">
+      <div class="modal-box">
+        <div class="modal-title" id="modal-title" style="font-weight:800; font-size:18px; margin-bottom:10px;">Conferma</div>
+        <div class="modal-desc" id="modal-desc" style="font-size:14px; opacity:0.9; line-height: 1.4;">Vuoi procedere?</div>
+        <div class="modal-btns">
+          <button class="btn-action btn-cancel" onclick="closeConfirmModal()">ANNULLA</button>
+          <button class="btn-action btn-confirm" id="modal-confirm-btn">APRI</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const allApps = [
+      { id: 'family', title: 'Famiglia Foto', bg: 'bg-family', action: () => openWindow('win-family'), icon: '<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>' },
+      { id: 'phone', title: 'Telefono', bg: 'bg-phone', action: callPrimaryEmergency, icon: '<path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>' },
+      { id: 'access', title: 'Rubrica', bg: 'bg-access', action: () => openWindow('win-accessibility'), icon: '<path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>' },
+      { 
+        id: 'faq', 
+        title: 'Guida', 
+        bg: 'bg-faq', 
+        action: () => openWindow('win-faq'), 
+        icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.02-.42 1.95-1.07 2.62z"/>' 
+      },
+      { id: 'messages', title: 'Messaggi', bg: 'bg-messages', action: () => location.href='sms:', icon: '<path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/>' },
+      { id: 'photos', title: 'Galleria Foto', bg: 'bg-photos', action: () => openWindow('win-photos'), icon: '<path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>' },
+      { id: 'camera', title: 'Fotocamera', bg: 'bg-camera', action: openCamera, icon: '<circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>' },
+      { id: 'settings', title: 'Impostazioni', bg: 'bg-settings', action: () => requestOpenApp('Impostazioni', () => openWindow('win-settings')), icon: '<path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>' },
+      { id: 'sos', title: 'SOS 112', bg: 'bg-sos', action: triggerSOS, icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>' }
+    ];
+
+    let contacts = [];
+    let galleryPhotos = [];
+    let cameraStream = null;
+    let currentGridCount = 4;
+    let currentPage = 1;
+    let torchActive = false;
+
+    const faqList = [
+      { q: "1. Come aggiungere un contatto?", a: "Vai in Rubrica e premi sul pulsante verde 'Nuovo' in alto a destra. Inserisci nome, numero, eventuale foto e decidi se impostarlo come SOS principale." },
+      { q: "2. Dove vanno a finire le foto scattate?", a: "Tutte le fotografie scattate con la Fotocamera vengono archiviate automaticamente all'interno dell'app 'Galleria Foto'." },
+      { q: "3. Come funziona il pulsante SOS 112?", a: "Il pulsante rosso SOS 112 permette di avviare immediatamente una chiamata di emergenza rapida verso il numero unico europeo 112." },
+      { q: "4. Come personalizzare i colori o la grandezza del testo?", a: "Entra in Impostazioni (richiede conferma). Da lì potrai cambiare il tema cromatico di tutto il sistema, attivare l'alto contrasto, il grassetto o regolare la dimensione del testo." },
+      { q: "5. Come cambiare la disposizione delle icone?", a: "Nelle Impostazioni, sotto la voce 'Layout Schermata', puoi scegliere se visualizzare 1, 2, 4 o 8 icone per pagina in base alle tue preferenze di spazio." },
+      { q: "6. Come si accende la torcia del telefono?", a: "Basta premere il pulsante blu '🔦 TORCIA' situato in alto a sinistra nella barra di stato principale." },
+      { q: "7. Come posso eliminare un contatto dalla rubrica?", a: "Apri la Rubrica, individua il contatto da rimuovere e premi sul pulsante rosso con il cestino 🗑️." },
+      { q: "8. Come impostare il contatto preferito per la chiamata rapida?", a: "Nella sezione Rubrica, premi la stella ★ sul contatto desiderato per renderlo il contatto SOS principale associato al tasto di chiamata rapida." },
+      { q: "9. Come inviare un messaggio rapido?", a: "Toccare l'icona 'Messaggi' per aprire direttamente l'applicazione di messaggistica integrata del dispositivo." },
+      { q: "10. Le foto salvate occupano spazio?", a: "Le foto vengono memorizzate nella memoria locale del browser in uso." },
+      { q: "11. Come funziona la fotocamera?", a: "Toccando l'icona Fotocamera si attiva l'inquadratura; premendo il pulsante bianco grande si scatta la foto, che può essere ripetuta o archiviata." },
+      { q: "12. Come cambiare pagina nella schermata principale?", a: "Usa i pulsanti 'INDIETRO' e 'AVANTI' situati nella barra inferiore per navigare tra le diverse pagine delle applicazioni." },
+      { q: "13. Cosa succede se premo 'Famiglia Foto'?", a: "Si apre una schermata con tutte le foto e i contatti rapidi dei familiari configurati, pronti per essere chiamati con un semplice tocco." },
+      { q: "14. Come attivare l'alto contrasto?", a: "Entra in Impostazioni, vai alla voce 'Visione & Leggibilità' e attiva l'interruttore dell'Alto Contrasto per migliorare la visibilità dello schermo." },
+      { q: "15. Come rendere il testo più grande?", a: "Nelle Impostazioni puoi scegliere tra le diverse scale di grandezza del testo (1x, 1.2x, 1.4x) per facilitare la lettura." },
+      { q: "16. Come attivare il testo in grassetto?", a: "Sempre nella sezione Impostazioni, sotto 'Visione & Leggibilità', puoi attivare l'opzione per rendere tutto il testo in grassetto." },
+      { q: "17. Perché alcune impostazioni chiedono una conferma?", a: "Per evitare tocchi accidentali da parte dell'utente, l'apertura delle impostazioni avanzate richiede una conferma aggiuntiva tramite una finestra di sicurezza." },
+      { q: "18. Come cambiare il tema di colore dello schermo?", a: "Nelle Impostazioni è disponibile una griglia con 8 colori di sfondo tra cui scegliere (Bianco, Nero, Blu, Giallo, Fucsia, Grigio, Verdino, Azzurro)." },
+      { q: "19. Cosa fare se la fotocamera non funziona?", a: "Assicurati di aver concesso i permessi per l'utilizzo della fotocamera al browser quando richiesto dal sistema." },
+      { q: "20. Come tornare alla schermata principale da qualsiasi app?", a: "Basta premere il pulsante rosso 'CHIUDI' in alto a destra in qualsiasi finestra aperta per ritornare subito alla schermata principale." }
+    ];
+
+    function saveStateToLocalStorage() {
+      const state = {
+        contacts,
+        galleryPhotos,
+        theme: document.body.className,
+        highContrast: document.body.classList.contains('high-contrast'),
+        boldText: document.body.classList.contains('bold-text'),
+        fontScale: getComputedStyle(document.documentElement).getPropertyValue('--font-scale').trim() || 1,
+        currentGridCount
+      };
+      localStorage.setItem('seniorOS_state', JSON.stringify(state));
+    }
+
+    function loadStateFromLocalStorage() {
+      const saved = localStorage.getItem('seniorOS_state');
+      if (!saved) return;
+      try {
+        const state = JSON.parse(saved);
+        if (state.contacts) contacts = state.contacts;
+        if (state.galleryPhotos) galleryPhotos = state.galleryPhotos;
+        if (state.theme) document.body.className = state.theme;
+        if (state.highContrast) {
+          document.body.classList.add('high-contrast');
+          document.getElementById('toggle-high-contrast').checked = true;
+        }
+        if (state.boldText) {
+          document.body.classList.add('bold-text');
+          document.getElementById('toggle-bold-text').checked = true;
+        }
+        if (state.fontScale) {
+          document.documentElement.style.setProperty('--font-scale', state.fontScale);
+          const scaleBtns = document.querySelectorAll('#font-scale-group .opt-btn');
+          scaleBtns.forEach(b => {
+            b.classList.remove('active');
+            if (b.textContent.includes(state.fontScale + 'x')) b.classList.add('active');
+          });
+        }
+        if (state.currentGridCount) {
+          currentGridCount = Number(state.currentGridCount);
+          document.querySelectorAll('.btn-grid').forEach(b => {
+            b.classList.remove('active');
+            if (b.textContent == currentGridCount) b.classList.add('active');
+          });
+        }
+        // Aggiorna classe active sul tema corrente
+        const currentThemeMatch = document.body.className.match(/theme-(\w+)/);
+        if (currentThemeMatch) {
+          const themeName = currentThemeMatch[1];
+          document.querySelectorAll('.theme-btn').forEach(b => {
+            b.classList.remove('active');
+            if (b.textContent.toLowerCase() === themeName) b.classList.add('active');
+          });
+        }
+      } catch (e) {
+        console.error('Errore nel caricamento dello stato', e);
+      }
+    }
+
+    function setTheme(themeName, btn) {
+      document.body.className = document.body.className.replace(/theme-\w+/g, '');
+      document.body.classList.add(`theme-${themeName}`);
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      saveStateToLocalStorage();
+    }
+
+    function openAddContactModal() {
+      document.getElementById('add-contact-modal').classList.add('active');
+    }
+
+    function closeAddContactModal() {
+      document.getElementById('add-contact-modal').classList.remove('active');
+    }
+
+    function saveContact() {
+      const nameInput = document.getElementById('contact-name');
+      const numInput = document.getElementById('contact-num');
+      const photoInput = document.getElementById('contact-photo');
+      const isEmergencyInput = document.getElementById('contact-emergency');
+
+      const name = nameInput.value.trim();
+      const num = numInput.value.trim();
+      const isEmergency = isEmergencyInput.checked;
+
+      if (!name || !num) {
+        alert('Inserisci nome e numero.');
+        return;
+      }
+
+      const processPhoto = (photoUrl) => {
+        if (isEmergency) contacts.forEach(c => c.isEmergency = false);
+        contacts.push({ id: Date.now(), name, num, photo: photoUrl, isEmergency });
+        nameInput.value = '';
+        numInput.value = '';
+        photoInput.value = '';
+        isEmergencyInput.checked = false;
+        closeAddContactModal();
+        renderContacts();
+        saveStateToLocalStorage();
+      };
+
+      if (photoInput.files && photoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => processPhoto(e.target.result);
+        reader.readAsDataURL(photoInput.files[0]);
+      } else {
+        processPhoto(null);
+      }
+    }
+
+    function removeContact(id) {
+      contacts = contacts.filter(c => c.id !== id);
+      renderContacts();
+      saveStateToLocalStorage();
+    }
+
+    function setEmergencyContact(id) {
+      contacts.forEach(c => c.isEmergency = (c.id === id));
+      renderContacts();
+      saveStateToLocalStorage();
+    }
+
+    function renderContacts() {
+      const familyGrid = document.getElementById('family-photo-grid');
+      const manageList = document.getElementById('contacts-management-list');
+      const dockLabel = document.getElementById('dock-call-label');
+
+      familyGrid.innerHTML = '';
+      manageList.innerHTML = '';
+
+      const emergencyContact = contacts.find(c => c.isEmergency);
+      dockLabel.textContent = emergencyContact ? emergencyContact.name.toUpperCase() : 'CHIAMA';
+
+      if (contacts.length === 0) {
+        familyGrid.innerHTML = '<div class="empty-state" style="grid-column: span 2;">Nessun contatto.</div>';
+        manageList.innerHTML = '<div class="empty-state">Nessun contatto inserito.</div>';
+        return;
+      }
+
+      contacts.forEach(c => {
+        const photoStyle = c.photo ? `background-image: url('${c.photo}');` : '';
+        const initial = c.name.charAt(0).toUpperCase();
+
+        const card = document.createElement('div');
+        card.className = `photo-card ${c.isEmergency ? 'is-emergency' : ''}`;
+        card.onclick = () => location.href = 'tel:' + c.num;
+        card.innerHTML = `
+          ${c.isEmergency ? '<div class="emergency-badge">SOS</div>' : ''}
+          <div class="photo-avatar" style="${photoStyle}">${c.photo ? '' : initial}</div>
+          <div style="font-weight:800; font-size:13px;">${c.name}</div>
+          <div style="font-size:10px; opacity:0.8;">${c.num}</div>
+        `;
+        familyGrid.appendChild(card);
+
+        const mItem = document.createElement('div');
+        mItem.className = `contact-card-manage ${c.isEmergency ? 'is-emergency' : ''}`;
+        mItem.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="photo-avatar" style="width:40px; height:40px; margin:0; font-size:13px; ${photoStyle}">${c.photo ? '' : initial}</div>
+            <div>
+              <div style="font-weight:800; font-size:14px;">${c.name}</div>
+              <div style="font-size:12px; opacity:0.8;">${c.num}</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            ${!c.isEmergency ? `<button class="opt-btn" style="padding:8px 12px;" onclick="setEmergencyContact(${c.id})">★</button>` : ''}
+            <button class="opt-btn btn-danger" style="padding:8px 12px;" onclick="removeContact(${c.id})">🗑️</button>
+          </div>
+        `;
+        manageList.appendChild(mItem);
+      });
+    }
+
+    function renderGallery() {
+      const galleryGrid = document.getElementById('gallery-grid');
+      galleryGrid.innerHTML = '';
+      if (galleryPhotos.length === 0) {
+        galleryGrid.innerHTML = '<div class="empty-state" style="grid-column: span 2;">Nessuna foto archiviata.</div>';
+        return;
+      }
+      galleryPhotos.forEach((photoData, index) => {
+        const card = document.createElement('div');
+        card.className = 'photo-card';
+        card.innerHTML = `
+          <div class="photo-avatar" style="width:100%; height:120px; border-radius:18px; background-image: url('${photoData}');"></div>
+          <div style="font-weight:800; font-size:12px; margin-top:8px;">Foto #${index + 1}</div>
+        `;
+        galleryGrid.appendChild(card);
+      });
+    }
+
+    function callPrimaryEmergency() {
+      const emergencyContact = contacts.find(c => c.isEmergency);
+      if (emergencyContact) {
+        location.href = 'tel:' + emergencyContact.num;
+      } else if (contacts.length > 0) {
+        location.href = 'tel:' + contacts[0].num;
+      } else {
+        openWindow('win-accessibility');
+      }
+    }
+
+    async function openCamera() {
+      openWindow('win-camera');
+      const video = document.getElementById('camera-video');
+      const canvas = document.getElementById('camera-canvas');
+      const msg = document.getElementById('camera-msg');
+      const snapBtn = document.getElementById('snap-btn');
+      const retakeBtn = document.getElementById('retake-btn');
+      
+      video.style.display = 'block';
+      canvas.style.display = 'none';
+      snapBtn.style.display = 'block';
+      retakeBtn.style.display = 'none';
+
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = cameraStream;
+      } catch (err) {
+        msg.style.display = 'block';
+      }
+    }
+
+    function takePhoto() {
+      const video = document.getElementById('camera-video');
+      const canvas = document.getElementById('camera-canvas');
+      const snapBtn = document.getElementById('snap-btn');
+      const retakeBtn = document.getElementById('retake-btn');
+      if (!cameraStream) return;
+
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      galleryPhotos.unshift(canvas.toDataURL('image/jpeg'));
+      renderGallery();
+      saveStateToLocalStorage();
+
+      video.style.display = 'none';
+      canvas.style.display = 'block';
+      snapBtn.style.display = 'none';
+      retakeBtn.style.display = 'block';
+    }
+
+    function retakePhoto() {
+      document.getElementById('camera-video').style.display = 'block';
+      document.getElementById('camera-canvas').style.display = 'none';
+      document.getElementById('snap-btn').style.display = 'block';
+      document.getElementById('retake-btn').style.display = 'none';
+    }
+
+    function closeCameraWindow() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      closeWindow('win-camera');
+    }
+
+    function renderFAQ() {
+      const container = document.getElementById('faq-container');
+      container.innerHTML = '';
+      faqList.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'faq-item';
+        el.innerHTML = `<div class="faq-q">${item.q}</div><div class="faq-a">${item.a}</div>`;
+        container.appendChild(el);
+      });
+    }
+
+    function toggleTorch() {
+      torchActive = !torchActive;
+      document.getElementById('torch-toggle').classList.toggle('active', torchActive);
+    }
+
+    function requestOpenApp(appName, callback) {
+      document.getElementById('modal-title').textContent = 'Aprire ' + appName + '?';
+      document.getElementById('modal-desc').textContent = 'Confermi di voler aprire ' + appName + '?';
+      const confirmBtn = document.getElementById('modal-confirm-btn');
+      confirmBtn.onclick = () => { closeConfirmModal(); callback(); };
+      document.getElementById('confirm-modal').classList.add('active');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirm-modal').classList.remove('active');
+    }
+
+    function triggerSOS() {
+      location.href = 'tel:112';
+    }
+
+    function renderHomeScreen() {
+      const homeScreen = document.getElementById('home-screen');
+      homeScreen.className = `home-screen grid-${currentGridCount}`;
+      homeScreen.innerHTML = '';
+
+      const totalPages = Math.ceil(allApps.length / currentGridCount);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * currentGridCount;
+      allApps.slice(startIndex, startIndex + currentGridCount).forEach(app => {
+        const appEl = document.createElement('div');
+        appEl.className = `app-icon ${app.bg}`;
+        appEl.onclick = app.action;
+        appEl.innerHTML = `
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24">${app.icon}</svg>
+            <div class="app-label-overlay">${app.title}</div>
+          </div>
+        `;
+        homeScreen.appendChild(appEl);
+      });
+
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('btn-prev').disabled = currentPage === 1;
+      document.getElementById('btn-next').disabled = currentPage === totalPages;
+    }
+
+    function setGrid(count, btn) {
+      currentGridCount = count;
+      currentPage = 1;
+      document.querySelectorAll('.btn-grid').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderHomeScreen();
+      saveStateToLocalStorage();
+    }
+
+    function changePage(dir) {
+      currentPage += dir;
+      renderHomeScreen();
+    }
+
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    }, 1000);
+
+    function openWindow(id) {
+      if (id === 'win-photos') renderGallery();
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeWindow(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function toggleHighContrast(cb) {
+      document.body.classList.toggle('high-contrast', cb.checked);
+      saveStateToLocalStorage();
+    }
+    
+    function toggleBoldText(cb) {
+      document.body.classList.toggle('bold-text', cb.checked);
+      saveStateToLocalStorage();
+    }
+
+    function setFontScale(scale, btn) {
+      document.documentElement.style.setProperty('--font-scale', scale);
+      document.querySelectorAll('#win-settings .opt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      saveStateToLocalStorage();
+    }
+
+    // Inizializzazione con recupero dati salvati
+    loadStateFromLocalStorage();
+    renderContacts();
+    renderGallery();
+    renderFAQ();
+    renderHomeScreen();
+  </script>
+</body>
+</html>
