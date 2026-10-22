@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Keys</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lock-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 24px;
+            color: #00FF22;
+        }
+
+        .lock-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .lock-subtitle {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 32px;
+        }
+
+        .pin-dots {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .pin-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1.5px solid #3a3a3c;
+            transition: all 0.2s ease;
+        }
+
+        .pin-dot.filled {
+            background-color: #00FF22;
+            border-color: #00FF22;
+            box-shadow: 0 0 10px rgba(0, 255, 34, 0.4);
+        }
+
+        .pin-dot.error {
+            background-color: #ff3b30;
+            border-color: #ff3b30;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            width: 100%;
+            max-width: 270px;
+        }
+
+        .key-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background-color: #1c1c1e;
+            border: none;
+            color: #fff;
+            font-size: 26px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 auto;
+            transition: background-color 0.15s;
+        }
+
+        .key-btn:active {
+            background-color: #2c2c2e;
+        }
+
+        .default-pin-hint {
+            margin-top: 32px;
+            font-size: 12px;
+            color: #00FF22;
+            background: rgba(0, 255, 34, 0.08);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 34, 0.2);
+        }
+
+        .top-nav {
+            position: sticky;
+            top: 12px;
+            z-index: 100;
+            margin-top: 12px;
+            margin-bottom: 20px;
+            background: rgba(28, 28, 30, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 4px;
+            border-radius: 30px;
+            display: flex;
+            gap: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: calc(100% - 32px);
+            max-width: 400px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            background: transparent;
+            color: #8e8e93;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .nav-btn.active {
+            background-color: #00FF22;
+            color: #000000;
+            box-shadow: 0 0 12px rgba(0, 255, 34, 0.35);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        .card {
+            background-color: #1c1c1e;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .search-box {
+            background-color: #2c2c2e;
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            width: 100%;
+            outline: none;
+            user-select: text;
+        }
+
+        .categories {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            scrollbar-width: none;
+        }
+
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-chip {
+            padding: 6px 14px;
+            background-color: #2c2c2e;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #8e8e93;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .cat-chip.active {
+            background-color: rgba(0, 255, 34, 0.12);
+            color: #00FF22;
+            border-color: rgba(0, 255, 34, 0.25);
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-card {
+            background-color: #2c2c2e;
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .item-cat {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 8px;
+            background: #3a3a3c;
+            color: #8e8e93;
+        }
+
+        .item-field {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1c1c1e;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .item-val {
+            font-family: monospace;
+            color: #d1d1d6;
+            user-select: text;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: #00FF22;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            font-size: 14px;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 14px;
+            background-color: #00FF22;
+            color: #000;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 34, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-main:active {
+            opacity: 0.85;
+        }
+
+        .btn-danger {
+            background-color: #ff3b30;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 59, 48, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: #2c2c2e;
+            color: #fff;
+            box-shadow: none;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            font-size: 11px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .input-group input, .input-group select {
+            background-color: #2c2c2e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            user-select: text;
+        }
+
+        .gen-output {
+            background-color: #2c2c2e;
+            border-radius: 12px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 1px;
+            word-break: break-all;
+            margin-bottom: 12px;
+            border: 1px solid rgba(0, 255, 34, 0.2);
+            color: #00FF22;
+            user-select: text;
+        }
+
+        .slider-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-box input[type=range] {
+            flex: 1;
+            accent-color: #00FF22;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 14px;
+        }
+
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #3a3a3c;
+            transition: .25s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .25s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #00FF22;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1c1c1e;
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-badge {
+            align-self: center;
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+    
+/* Pulsante Home in stile iOS */
+.home-return{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;width:86px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(38,38,42,.76);color:#fff;text-decoration:none;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 4px 22px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.12);transition:transform .15s,background .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.home-return:active{transform:translateX(-50%) scale(.94);background:rgba(65,65,70,.9)}
+.home-return svg{width:18px;height:18px;display:block}
+/* Lascia spazio al controllo in basso ed evita che la pagina venga ingrandita automaticamente. */
+body{padding-bottom:max(56px,calc(48px + env(safe-area-inset-bottom))) !important}
+@media(hover:hover){.home-return:hover{background:rgba(65,65,70,.9)}}
+
+</style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <div class="lock-title">Keys Manager</div>
+        <div class="lock-subtitle">Inserisci il PIN per accedere</div>
+        
+        <div class="pin-dots">
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+        </div>
+
+        <div class="keypad">
+            <button class="key-btn" onclick="pressPin('1')">1</button>
+            <button class="key-btn" onclick="pressPin('2')">2</button>
+            <button class="key-btn" onclick="pressPin('3')">3</button>
+            <button class="key-btn" onclick="pressPin('4')">4</button>
+            <button class="key-btn" onclick="pressPin('5')">5</button>
+            <button class="key-btn" onclick="pressPin('6')">6</button>
+            <button class="key-btn" onclick="pressPin('7')">7</button>
+            <button class="key-btn" onclick="pressPin('8')">8</button>
+            <button class="key-btn" onclick="pressPin('9')">9</button>
+            <button class="key-btn" style="visibility:hidden"></button>
+            <button class="key-btn" onclick="pressPin('0')">0</button>
+            <button class="key-btn" onclick="clearPin()">⌫</button>
+        </div>
+
+        <div class="default-pin-hint" id="pin-hint">PIN predefinito: 000000</div>
+    </div>
+
+    <div class="top-nav">
+        <button class="nav-btn active" onclick="switchTab('vault')">Vault</button>
+        <button class="nav-btn" onclick="switchTab('generator')">Nuova</button>
+        <button class="nav-btn" onclick="switchTab('analysis')">Analisi</button>
+        <button class="nav-btn" onclick="switchTab('settings')">Opzioni</button>
+    </div>
+
+    <div class="container">
+
+        <div id="tab-vault" class="tab-content active">
+            <button class="btn-main" onclick="openAddModal()">Nuova Keys</button>
+            
+            <div class="card">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="search-input" placeholder="Cerca account o sito..." oninput="renderVault()">
+                </div>
+
+                <div class="categories">
+                    <div class="cat-chip active" onclick="filterCat('ALL', this)">Tutti</div>
+                    <div class="cat-chip" onclick="filterCat('Social', this)">Social</div>
+                    <div class="cat-chip" onclick="filterCat('Lavoro', this)">Lavoro</div>
+                    <div class="cat-chip" onclick="filterCat('Finanza', this)">Finanza</div>
+                    <div class="cat-chip" onclick="filterCat('Altro', this)">Altro</div>
+                </div>
+
+                <div id="vault-list" class="item-list"></div>
+            </div>
+        </div>
+
+        <div id="tab-generator" class="tab-content">
+            <div class="card">
+                <div class="gen-output" id="gen-result">--------</div>
+                <button class="btn-main" onclick="generatePassword()" style="margin-bottom:10px;">Genera Nuova</button>
+                <button class="btn-main btn-secondary" onclick="copyGenPassword()" style="margin-bottom:16px;">Copia</button>
+
+                <div class="input-group">
+                    <div class="slider-box">
+                        <label>Lunghezza: <span id="len-val" style="color:#00FF22;">16</span></label>
+                        <input type="range" id="gen-len" min="6" max="32" value="16" oninput="document.getElementById('len-val').innerText=this.value; generatePassword();">
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <span>Consenti MAIUSCOLE</span>
+                    <label class="switch"><input type="checkbox" id="gen-upper" checked onchange="generatePassword()"><span class="slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                    <span>Consenti minuscole</span>
+                    <label class="switch"><input type="checkbox" id="gen-lower" checked onchange="generatePassword()"><span class="slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                    <span>Consenti Numeri</span>
+                    <label class="switch"><input type="checkbox" id="gen-nums" checked onchange="generatePassword()"><span class="slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                    <span>Consenti Simboli</span>
+                    <label class="switch"><input type="checkbox" id="gen-syms" checked onchange="generatePassword()"><span class="slider"></span></label>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-analysis" class="tab-content">
+            <div class="card" style="text-align:center;">
+                <h3 style="margin-bottom:8px; font-weight:600;">Sicurezza Vault</h3>
+                <div id="health-score" style="font-size:38px; font-weight:800; color:#00FF22; margin:6px 0;">100%</div>
+                <p style="font-size:12px; color:#8e8e93;">Punteggio complessivo di protezione</p>
+            </div>
+
+            <div class="card">
+                <div class="toggle-row">
+                    <span>Keys deboli</span>
+                    <span id="cnt-weak" style="color:#ff3b30; font-weight:bold;">0</span>
+                </div>
+                <div class="toggle-row">
+                    <span>Keys riutilizzate</span>
+                    <span id="cnt-reused" style="color:#ffcc00; font-weight:bold;">0</span>
+                </div>
+                <div class="toggle-row">
+                    <span>Totale Keys</span>
+                    <span id="cnt-total" style="color:#00FF22; font-weight:bold;">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="tab-content">
+            <div class="card">
+                <h3 style="margin-bottom:14px; font-size:15px; font-weight:600;">Modifica Codice PIN</h3>
+                <div class="input-group">
+                    <label>PIN Attuale</label>
+                    <input type="password" id="curr-pin-input" maxlength="6" placeholder="PIN attuale">
+                </div>
+                <div class="input-group">
+                    <label>Nuovo PIN</label>
+                    <input type="password" id="new-pin-input" maxlength="6" placeholder="000000">
+                </div>
+                <button class="btn-main" onclick="changePin()">Salva</button>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom:14px; font-size:15px; font-weight:600; color:#ff3b30;">Zona pericolosa</h3>
+                <p style="font-size:12px; color:#8e8e93; margin-bottom:12px;">Cancella l'intero database delle password chiedendo conferma di sicurezza.</p>
+                <button class="btn-main btn-danger" onclick="startResetProcess()">Elimina tutti i tuoi dati ora</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="modal-add" class="modal">
+        <div class="modal-content">
+            <h3 style="text-align:center; font-size:16px;">Nuova Credenziale</h3>
+            <div class="input-group">
+                <label>Servizio</label>
+                <input type="text" id="add-title" placeholder="Service">
+            </div>
+            <div class="input-group">
+                <label>User</label>
+                <input type="text" id="add-user" placeholder="example@email.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="text" id="add-pass" placeholder="Password">
+            </div>
+            <div class="input-group">
+                <label>Categoria</label>
+                <select id="add-cat">
+                    <option value="Social">Social</option>
+                    <option value="Lavoro">Lavoro</option>
+                    <option value="Finanza">Finanza</option>
+                    <option value="Altro">Altro</option>
+                </select>
+            </div>
+            <button class="btn-main" onclick="saveCredential()">Salva Keys</button>
+            <button class="btn-main btn-secondary" onclick="closeModal('modal-add')">Annulla</button>
+        </div>
+    </div>
+
+    <div id="modal-reset" class="modal">
+        <div class="modal-content" style="text-align:center;">
+            <div class="step-badge" id="reset-step-badge">CONFERMA SICUREZZA</div>
+            <h3 style="color:#ff3b30; font-size:16px;">Confermi l'eliminazione?</h3>
+            <p id="reset-msg" style="font-size:13px; color:#8e8e93;">Per procedere inserisci il tuo PIN attuale.</p>
+            
+            <div class="input-group" style="margin-top:10px;">
+                <input type="password" id="reset-pin-confirm" maxlength="6" placeholder="Inserisci PIN" style="text-align:center; font-size:18px; letter-spacing:4px;">
+            </div>
+
+            <button class="btn-main btn-danger" onclick="confirmReset()">Elimina Definitivamente</button>
+            <button class="btn-main btn-secondary" onclick="closeModal('modal-reset')">Annulla</button>
+        </div>
+    </div>
+
+    <script>
+        let db;
+        let enteredPin = "";
+        let currentCategory = "ALL";
+
+        function initIndexedDB() {
+            const request = indexedDB.open("PassManagerDB", 1);
+            request.onupgradeneeded = (e) => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains("vault")) {
+                    db.createObjectStore("vault", { keyPath: "id", autoIncrement: true });
+                }
+            };
+            request.onsuccess = (e) => {
+                db = e.target.result;
+                renderVault();
+                runAnalysis();
+            };
+        }
+
+        function getStoredPin() {
+            return localStorage.getItem("app_pin") || "000000";
+        }
+
+        function pressPin(num) {
+            if (enteredPin.length < 6) {
+                enteredPin += num;
+                updatePinDots();
+            }
+            if (enteredPin.length === 6) {
+                setTimeout(verifyPin, 100);
+            }
+        }
+
+        function clearPin() {
+            enteredPin = enteredPin.slice(0, -1);
+            updatePinDots();
+        }
+
+        function updatePinDots() {
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach((dot, index) => {
+                if (index < enteredPin.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled', 'error');
+                }
+            });
+        }
+
+        function verifyPin() {
+            if (enteredPin === getStoredPin()) {
+                document.getElementById('lock-screen').style.display = 'none';
+                if (getStoredPin() !== "000000") {
+                    document.getElementById('pin-hint').style.display = 'none';
+                }
+            } else {
+                const dots = document.querySelectorAll('.pin-dot');
+                dots.forEach(dot => dot.classList.add('error'));
+                setTimeout(() => {
+                    enteredPin = "";
+                    updatePinDots();
+                }, 400);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            event.target.classList.add('active');
+            
+            if(tabId === 'analysis') runAnalysis();
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-add').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function filterCat(cat, el) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderVault();
+        }
+
+        function saveCredential() {
+            const title = document.getElementById('add-title').value;
+            const user = document.getElementById('add-user').value;
+            const pass = document.getElementById('add-pass').value;
+            const cat = document.getElementById('add-cat').value;
+
+            if(!title || !pass) return;
+
+            const tx = db.transaction("vault", "readwrite");
+            tx.objectStore("vault").add({ title, user, pass, cat, date: new Date().toISOString() });
+            
+            tx.oncomplete = () => {
+                closeModal('modal-add');
+                document.getElementById('add-title').value = '';
+                document.getElementById('add-user').value = '';
+                document.getElementById('add-pass').value = '';
+                renderVault();
+            };
+        }
+
+        function renderVault() {
+            if(!db) return;
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const list = document.getElementById('vault-list');
+            list.innerHTML = '';
+
+            const tx = db.transaction("vault", "readonly");
+            const store = tx.objectStore("vault");
+            
+            store.getAll().onsuccess = (e) => {
+                const items = e.target.result;
+                items.forEach(item => {
+                    if(currentCategory !== "ALL" && item.cat !== currentCategory) return;
+                    if(query && !item.title.toLowerCase().includes(query) && !item.user.toLowerCase().includes(query)) return;
+
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.innerHTML = `
+                        <div class="item-header">
+                            <span class="item-title">${item.title}</span>
+                            <span class="item-cat">${item.cat}</span>
+                        </div>
+                        <div class="item-field">
+                            <span class="item-val">${item.user || 'N/A'}</span>
+                            <button class="btn-icon" onclick="copyText('${item.user}')">📋</button>
+                        </div>
+                        <div class="item-field">
+                            <span class="item-val" id="pass-${item.id}">••••••••</span>
+                            <div>
+                                <button class="btn-icon" style="display:inline;" onclick="togglePass('${item.id}', '${item.pass}')">👁️</button>
+                                <button class="btn-icon" style="display:inline;" onclick="copyText('${item.pass}')">📋</button>
+                                <button class="btn-icon" style="display:inline; color:#ff3b30;" onclick="deleteCredential(${item.id})">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            };
+        }
+
+        function togglePass(id, realPass) {
+            const el = document.getElementById(`pass-${id}`);
+            if(el.innerText === '••••••••') {
+                el.innerText = realPass;
+            } else {
+                el.innerText = '••••••••';
+            }
+        }
+
+        function copyText(txt) {
+            navigator.clipboard.writeText(txt);
+        }
+
+        function deleteCredential(id) {
+            const tx = db.transaction("vault", "readwrite");
+            tx.objectStore("vault").delete(id);
+            tx.oncomplete = () => renderVault();
+        }
+
+        function generatePassword() {
+            const len = document.getElementById('gen-len').value;
+            const u = document.getElementById('gen-upper').checked;
+            const l = document.getElementById('gen-lower').checked;
+            const n = document.getElementById('gen-nums').checked;
+            const s = document.getElementById('gen-syms').checked;
+
+            let charset = "";
+            if(u) charset += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            if(l) charset += "abcdefghijklmnopqrstuvwxyz";
+            if(n) charset += "0123456789";
+            if(s) charset += "!@#$%^&*()_+-=[]{}|";
+
+            if(!charset) return;
+
+            let res = "";
+            for(let i=0; i<len; i++) {
+                res += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            document.getElementById('gen-result').innerText = res;
+        }
+
+        function copyGenPassword() {
+            copyText(document.getElementById('gen-result').innerText);
+        }
+
+        function changePin() {
+            const currPin = document.getElementById('curr-pin-input').value;
+            const newPin = document.getElementById('new-pin-input').value;
+
+            if (currPin !== getStoredPin()) {
+                alert("Il PIN attuale inserito non è corretto.");
+                return;
+            }
+
+            if(newPin.length === 6 && /^\d+$/.test(newPin)) {
+                localStorage.setItem("app_pin", newPin);
+                alert("PIN modificato con successo!");
+                document.getElementById('curr-pin-input').value = "";
+                document.getElementById('new-pin-input').value = "";
+            } else {
+                alert("Inserisci un nuovo PIN valido composto da 6 cifre.");
+            }
+        }
+
+        function runAnalysis() {
+            if(!db) return;
+            const tx = db.transaction("vault", "readonly");
+            tx.objectStore("vault").getAll().onsuccess = (e) => {
+                const items = e.target.result;
+                let weak = 0;
+                let reused = 0;
+                const passMap = {};
+
+                items.forEach(i => {
+                    if(i.pass.length < 8) weak++;
+                    if(passMap[i.pass]) reused++;
+                    passMap[i.pass] = true;
+                });
+
+                document.getElementById('cnt-total').innerText = items.length;
+                document.getElementById('cnt-weak').innerText = weak;
+                document.getElementById('cnt-reused').innerText = reused;
+
+                let score = 100 - (weak * 15) - (reused * 20);
+                if(score < 0) score = 0;
+                if(items.length === 0) score = 100;
+
+                document.getElementById('health-score').innerText = `${score}%`;
+            };
+        }
+
+        function startResetProcess() {
+            document.getElementById('reset-pin-confirm').value = '';
+            document.getElementById('modal-reset').style.display = 'flex';
+        }
+
+        function confirmReset() {
+            const inputPin = document.getElementById('reset-pin-confirm').value;
+            if (inputPin !== getStoredPin()) {
+                alert("PIN errato! Impossibile cancellare i dati.");
+                return;
+            }
+
+            const tx = db.transaction("vault", "readwrite");
+            tx.objectStore("vault").clear();
+            tx.oncomplete = () => {
+                localStorage.clear();
+                location.reload();
+            };
+        }
+
+        window.onload = () => {
+            initIndexedDB();
+            generatePassword();
+        };
+    </script>
+
+<a class="home-return" href="index.html" aria-label="Torna alla Home" title="Torna alla Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg></a>
+</body>
+</html>

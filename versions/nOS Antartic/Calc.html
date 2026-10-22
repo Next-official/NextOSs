@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Calcolatrice & Convertitore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neonGreen: '#00FF22',
+                        darkBg: '#0A0A0C',
+                        btnDark: '#1E1E22',
+                        btnSlate: '#323A45',
+                        pillBg: '#161619',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #0A0A0C;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        /* Rimuove esplicitamente le freccette su tutti i browser per input number */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+            display: none !important;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield !important;
+            appearance: textfield !important;
+        }
+
+        /* Rimuove le freccette dai menu a tendina */
+        select {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            background-image: none !important;
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(0, 255, 34, 0.45);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    
+/* Pulsante Home in stile iOS */
+.home-return{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;width:86px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(38,38,42,.76);color:#fff;text-decoration:none;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 4px 22px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.12);transition:transform .15s,background .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.home-return:active{transform:translateX(-50%) scale(.94);background:rgba(65,65,70,.9)}
+.home-return svg{width:18px;height:18px;display:block}
+/* Lascia spazio al controllo in basso ed evita che la pagina venga ingrandita automaticamente. */
+body{padding-bottom:max(56px,calc(48px + env(safe-area-inset-bottom))) !important}
+@media(hover:hover){.home-return:hover{background:rgba(65,65,70,.9)}}
+
+</style>
+</head>
+<body class="h-full flex flex-col justify-between max-w-md mx-auto relative select-none bg-darkBg text-white px-4 pt-4 pb-6">
+
+    <!-- Top Segmented Pill Control Navigation -->
+    <header class="w-full flex justify-center pt-2 pb-4">
+        <div class="bg-pillBg border border-white/5 p-1 rounded-full flex items-center gap-1 w-full max-w-xs shadow-inner">
+            <button onclick="switchTab('standard')" id="pill-std" class="flex-1 py-1.5 rounded-full text-xs font-medium text-gray-400 transition-all duration-200">
+                Standard
+            </button>
+            <button onclick="switchTab('scientific')" id="pill-sci" class="flex-1 py-1.5 rounded-full text-xs font-semibold bg-neonGreen text-black shadow-md transition-all duration-200">
+                Scientifica
+            </button>
+            <button onclick="switchTab('converter')" id="pill-conv" class="flex-1 py-1.5 rounded-full text-xs font-medium text-gray-400 transition-all duration-200">
+                Convertitore
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 flex flex-col justify-end w-full max-w-md relative overflow-hidden pb-2">
+
+        <!-- VISTA CALCOLATRICE STANDARD -->
+        <div id="view-standard" class="flex flex-col justify-end h-full w-full space-y-3 hidden">
+            <!-- Screen Display -->
+            <div class="w-full px-2 text-right flex flex-col justify-end min-h-[120px] mb-2">
+                <div id="std-history" class="text-gray-400 text-sm font-light tracking-wide min-h-[22px] overflow-x-auto whitespace-nowrap no-scrollbar pr-1"></div>
+                <div id="std-display" class="text-white text-6xl font-light tracking-tight overflow-x-auto whitespace-nowrap no-scrollbar py-1">0</div>
+            </div>
+
+            <!-- Keypad Matrix -->
+            <div class="grid grid-cols-4 gap-2.5">
+                <button onclick="stdClear()" class="h-16 rounded-2xl bg-btnSlate text-white font-medium text-xl transition active:opacity-70">AC</button>
+                <button onclick="stdToggleSign()" class="h-16 rounded-2xl bg-btnSlate text-white font-medium text-xl transition active:opacity-70">±</button>
+                <button onclick="stdPercent()" class="h-16 rounded-2xl bg-btnSlate text-white font-medium text-xl transition active:opacity-70">%</button>
+                <button onclick="stdOp('/')" class="h-16 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">÷</button>
+
+                <button onclick="stdNum('7')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">7</button>
+                <button onclick="stdNum('8')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">8</button>
+                <button onclick="stdNum('9')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">9</button>
+                <button onclick="stdOp('*')" class="h-16 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">×</button>
+
+                <button onclick="stdNum('4')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">4</button>
+                <button onclick="stdNum('5')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">5</button>
+                <button onclick="stdNum('6')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">6</button>
+                <button onclick="stdOp('-')" class="h-16 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">-</button>
+
+                <button onclick="stdNum('1')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">1</button>
+                <button onclick="stdNum('2')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">2</button>
+                <button onclick="stdNum('3')" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">3</button>
+                <button onclick="stdOp('+')" class="h-16 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">+</button>
+
+                <button onclick="stdNum('0')" class="col-span-2 h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl text-left pl-8 transition active:opacity-70">0</button>
+                <button onclick="stdDot()" class="h-16 rounded-2xl bg-btnDark text-white font-normal text-2xl transition active:opacity-70">.</button>
+                <button onclick="stdCalc()" class="h-16 rounded-2xl bg-neonGreen text-black font-semibold text-3xl transition active:opacity-80 neon-glow">=</button>
+            </div>
+        </div>
+
+        <!-- VISTA CALCOLATRICE SCIENTIFICA (Default) -->
+        <div id="view-scientific" class="flex flex-col justify-end h-full w-full space-y-2">
+            <!-- Display -->
+            <div class="w-full px-2 text-right flex flex-col justify-end min-h-[90px] mb-1">
+                <div id="sci-history" class="text-gray-400 text-sm font-light tracking-wide min-h-[20px] overflow-x-auto whitespace-nowrap no-scrollbar pr-1"></div>
+                <div id="sci-display" class="text-white text-5xl font-light tracking-tight overflow-x-auto whitespace-nowrap no-scrollbar py-1">0</div>
+            </div>
+
+            <!-- Griglia Tasti Scientifica -->
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="sciFunc('sin')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">sin</button>
+                <button onclick="sciFunc('cos')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">cos</button>
+                <button onclick="sciFunc('tan')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">tan</button>
+                <button onclick="sciConst('pi')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">π</button>
+
+                <button onclick="sciFunc('log')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">log</button>
+                <button onclick="sciFunc('ln')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">ln</button>
+                <button onclick="sciFunc('sqrt')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">√</button>
+                <button onclick="sciConst('e')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">e</button>
+
+                <button onclick="sciOp('^')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">xʸ</button>
+                <button onclick="sciBracket('(')" class="h-11 rounded-2xl bg-btnDark text-gray-300 font-medium text-sm transition active:opacity-70">(</button>
+                <button onclick="sciBracket(')')" class="h-11 rounded-2xl bg-btnDark text-gray-300 font-medium text-sm transition active:opacity-70">)</button>
+                <button onclick="sciFunc('fact')" class="h-11 rounded-2xl bg-btnDark text-neonGreen font-medium text-sm transition active:opacity-70">n!</button>
+
+                <button onclick="sciClear()" class="h-12 rounded-2xl bg-btnSlate text-white font-medium text-lg transition active:opacity-70">AC</button>
+                <button onclick="sciToggleSign()" class="h-12 rounded-2xl bg-btnSlate text-white font-medium text-lg transition active:opacity-70">±</button>
+                <button onclick="sciPercent()" class="h-12 rounded-2xl bg-btnSlate text-white font-medium text-lg transition active:opacity-70">%</button>
+                <button onclick="sciOp('/')" class="h-12 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">÷</button>
+
+                <button onclick="sciNum('7')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">7</button>
+                <button onclick="sciNum('8')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">8</button>
+                <button onclick="sciNum('9')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">9</button>
+                <button onclick="sciOp('*')" class="h-12 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">×</button>
+
+                <button onclick="sciNum('4')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">4</button>
+                <button onclick="sciNum('5')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">5</button>
+                <button onclick="sciNum('6')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">6</button>
+                <button onclick="sciOp('-')" class="h-12 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">-</button>
+
+                <button onclick="sciNum('1')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">1</button>
+                <button onclick="sciNum('2')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">2</button>
+                <button onclick="sciNum('3')" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">3</button>
+                <button onclick="sciOp('+')" class="h-12 rounded-2xl bg-btnDark text-neonGreen font-semibold text-2xl transition active:opacity-70">+</button>
+
+                <button onclick="sciNum('0')" class="col-span-2 h-12 rounded-2xl bg-btnDark text-white font-normal text-xl text-left pl-7 transition active:opacity-70">0</button>
+                <button onclick="sciDot()" class="h-12 rounded-2xl bg-btnDark text-white font-normal text-xl transition active:opacity-70">.</button>
+                <button onclick="sciCalc()" class="h-12 rounded-2xl bg-neonGreen text-black font-semibold text-2xl transition active:opacity-80 neon-glow">=</button>
+            </div>
+        </div>
+
+        <!-- VISTA CONVERTITORE -->
+        <div id="view-converter" class="flex flex-col h-full w-full justify-start pt-2 space-y-5 hidden">
+            <!-- Categoria Menu -->
+            <div class="space-y-1.5">
+                <label class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold px-1">Categoria Conversione</label>
+                <div class="relative w-full">
+                    <select id="conv-category" onchange="onCategoryChange()" class="w-full bg-btnDark text-neonGreen font-semibold text-base px-4 py-3.5 rounded-2xl border border-white/5 focus:outline-none focus:border-neonGreen/50 transition cursor-pointer">
+                        <option value="length">Lunghezza</option>
+                        <option value="weight">Peso / Massa</option>
+                        <option value="temp">Temperatura</option>
+                        <option value="area">Area</option>
+                        <option value="data">Dati (Informatica)</option>
+                        <option value="current">Corrente Elettrica</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Converter Card -->
+            <div class="bg-btnDark/60 rounded-3xl p-5 border border-white/5 space-y-4 shadow-2xl">
+                <!-- Da -->
+                <div class="space-y-1.5">
+                    <label class="text-xs text-gray-400 font-medium">Da</label>
+                    <div class="space-y-2">
+                        <input type="number" id="conv-input" oninput="runConversion()" value="1" placeholder="Scrivi un valore..." class="w-full bg-black/80 text-white px-4 py-3 rounded-2xl font-light text-2xl border border-white/10 focus:outline-none focus:border-neonGreen transition">
+                        <select id="conv-from" onchange="runConversion()" class="w-full bg-btnSlate text-white px-4 py-3 rounded-xl font-medium text-sm border border-white/5 focus:outline-none cursor-pointer">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Bottone Scambio Unità -->
+                <div class="flex justify-center -my-1">
+                    <button onclick="swapUnits()" class="w-10 h-10 rounded-full bg-btnSlate hover:bg-btnSlate/80 border border-white/10 flex items-center justify-center text-neonGreen shadow-lg transition active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                    </button>
+                </div>
+
+                <!-- A -->
+                <div class="space-y-1.5">
+                    <label class="text-xs text-gray-400 font-medium">A</label>
+                    <div class="space-y-2">
+                        <div id="conv-output" class="w-full bg-black/40 text-neonGreen px-4 py-3 rounded-2xl font-semibold text-2xl border border-white/10 overflow-x-auto whitespace-nowrap no-scrollbar">1</div>
+                        <select id="conv-to" onchange="runConversion()" class="w-full bg-btnSlate text-white px-4 py-3 rounded-xl font-medium text-sm border border-white/5 focus:outline-none cursor-pointer">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-btnSlate border border-neonGreen/40 text-white px-4 py-2 rounded-full text-xs shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50">
+        Messaggio
+    </div>
+
+    <script>
+        // --- LOGICA CALCOLATRICE STANDARD ---
+        let stdInput = '0';
+        let stdHistory = '';
+        let stdReset = false;
+
+        function updateStd() {
+            document.getElementById('std-display').innerText = stdInput;
+            document.getElementById('std-history').innerText = stdHistory;
+        }
+
+        function stdNum(n) {
+            if (stdInput === '0' || stdReset) {
+                stdInput = n;
+                stdReset = false;
+            } else {
+                if (stdInput.length < 14) stdInput += n;
+            }
+            updateStd();
+        }
+
+        function stdDot() {
+            if (stdReset) {
+                stdInput = '0.';
+                stdReset = false;
+                updateStd();
+                return;
+            }
+            const parts = stdInput.split(/[\+\-\*\/]/);
+            if (!parts[parts.length - 1].includes('.')) {
+                stdInput += '.';
+                updateStd();
+            }
+        }
+
+        function stdOp(op) {
+            stdReset = false;
+            const last = stdInput.slice(-1);
+            if (['+', '-', '*', '/'].includes(last)) {
+                stdInput = stdInput.slice(0, -1) + op;
+            } else {
+                stdInput += op;
+            }
+            updateStd();
+        }
+
+        function stdClear() {
+            stdInput = '0';
+            stdHistory = '';
+            stdReset = false;
+            updateStd();
+        }
+
+        function stdToggleSign() {
+            if (stdInput.startsWith('-')) {
+                stdInput = stdInput.substring(1);
+            } else if (stdInput !== '0') {
+                stdInput = '-' + stdInput;
+            }
+            updateStd();
+        }
+
+        function stdPercent() {
+            try {
+                let v = parseFloat(stdInput);
+                stdInput = (v / 100).toString();
+                updateStd();
+            } catch (e) {
+                showToast("Errore");
+            }
+        }
+
+        function stdCalc() {
+            try {
+                stdHistory = stdInput + ' =';
+                let res = eval(stdInput);
+                if (!isFinite(res)) {
+                    showToast("Errore divisione per 0");
+                    return;
+                }
+                stdInput = parseFloat(res.toFixed(10)).toString();
+                stdReset = true;
+                updateStd();
+            } catch (e) {
+                showToast("Espressione non valida");
+            }
+        }
+
+        // --- LOGICA CALCOLATRICE SCIENTIFICA ---
+        let sciInput = '25*';
+        let sciHistory = '5*5 =';
+        let sciReset = false;
+
+        function updateSci() {
+            document.getElementById('sci-display').innerText = sciInput;
+            document.getElementById('sci-history').innerText = sciHistory;
+        }
+
+        function sciNum(n) {
+            if (sciInput === '0' || sciReset) {
+                sciInput = n;
+                sciReset = false;
+            } else {
+                if (sciInput.length < 16) sciInput += n;
+            }
+            updateSci();
+        }
+
+        function sciDot() {
+            if (sciReset) {
+                sciInput = '0.';
+                sciReset = false;
+                updateSci();
+                return;
+            }
+            const parts = sciInput.split(/[\+\-\*\/\^]/);
+            if (!parts[parts.length - 1].includes('.')) {
+                sciInput += '.';
+                updateSci();
+            }
+        }
+
+        function sciOp(op) {
+            sciReset = false;
+            const last = sciInput.slice(-1);
+            if (['+', '-', '*', '/', '^'].includes(last)) {
+                sciInput = sciInput.slice(0, -1) + op;
+            } else {
+                sciInput += op;
+            }
+            updateSci();
+        }
+
+        function sciBracket(b) {
+            if (sciInput === '0' && b === '(') {
+                sciInput = '(';
+            } else {
+                sciInput += b;
+            }
+            updateSci();
+        }
+
+        function sciConst(c) {
+            let val = (c === 'pi') ? Math.PI.toString() : Math.E.toString();
+            if (sciReset || sciInput === '0') {
+                sciInput = val;
+                sciReset = false;
+            } else {
+                sciInput += val;
+            }
+            updateSci();
+        }
+
+        function sciFunc(fn) {
+            try {
+                let expr = sciInput.replace(/[\*\+\-\/]$/, '');
+                let v = eval(expr.replace(/\^/g, '**'));
+                if (isNaN(v)) v = 0;
+                let r = 0;
+                switch (fn) {
+                    case 'sin': r = Math.sin(v); break;
+                    case 'cos': r = Math.cos(v); break;
+                    case 'tan': r = Math.tan(v); break;
+                    case 'log': r = Math.log10(v); break;
+                    case 'ln': r = Math.log(v); break;
+                    case 'sqrt': r = Math.sqrt(v); break;
+                    case 'fact':
+                        r = 1;
+                        for (let i = 2; i <= Math.floor(v); i++) r *= i;
+                        break;
+                }
+                sciHistory = `${fn}(${expr}) =`;
+                sciInput = parseFloat(r.toFixed(10)).toString();
+                sciReset = true;
+                updateSci();
+            } catch (e) {
+                showToast("Errore di calcolo");
+            }
+        }
+
+        function sciClear() {
+            sciInput = '0';
+            sciHistory = '';
+            sciReset = false;
+            updateSci();
+        }
+
+        function sciToggleSign() {
+            if (sciInput.startsWith('-')) {
+                sciInput = sciInput.substring(1);
+            } else if (sciInput !== '0') {
+                sciInput = '-' + sciInput;
+            }
+            updateSci();
+        }
+
+        function sciPercent() {
+            try {
+                let v = parseFloat(sciInput);
+                sciInput = (v / 100).toString();
+                updateSci();
+            } catch (e) {
+                showToast("Errore");
+            }
+        }
+
+        function sciCalc() {
+            try {
+                let parsed = sciInput.replace(/\^/g, '**');
+                sciHistory = sciInput + ' =';
+                let res = eval(parsed);
+                if (!isFinite(res)) {
+                    showToast("Errore di calcolo");
+                    return;
+                }
+                sciInput = parseFloat(res.toFixed(10)).toString();
+                sciReset = true;
+                updateSci();
+            } catch (e) {
+                showToast("Espressione non valida");
+            }
+        }
+
+        // --- DATI E LOGICA CONVERTITORE ---
+        const converterData = {
+            length: {
+                m: { name: 'Metri (m)', ratio: 1 },
+                km: { name: 'Chilometri (km)', ratio: 1000 },
+                cm: { name: 'Centimetri (cm)', ratio: 0.01 },
+                mm: { name: 'Millimetri (mm)', ratio: 0.001 },
+                um: { name: 'Micrometri (µm)', ratio: 0.000001 },
+                nm: { name: 'Nanometri (nm)', ratio: 0.000000001 },
+                mi: { name: 'Miglia (mi)', ratio: 1609.344 },
+                yd: { name: 'Yarde (yd)', ratio: 0.9144 },
+                ft: { name: 'Piedi (ft)', ratio: 0.3048 },
+                in: { name: 'Pollici (in)', ratio: 0.0254 },
+                nmi: { name: 'Miglia Nautiche (nmi)', ratio: 1852 }
+            },
+            weight: {
+                kg: { name: 'Chilogrammi (kg)', ratio: 1 },
+                g: { name: 'Grammi (g)', ratio: 0.001 },
+                mg: { name: 'Milligrammi (mg)', ratio: 0.000001 },
+                t: { name: 'Tonnellate (t)', ratio: 1000 },
+                lb: { name: 'Libbre (lb)', ratio: 0.45359237 },
+                oz: { name: 'Once (oz)', ratio: 0.02834952 },
+                st: { name: 'Pietre (Stone - st)', ratio: 6.350293 },
+                ct: { name: 'Carati (ct)', ratio: 0.0002 }
+            },
+            temp: {
+                C: { name: 'Celsius (°C)' },
+                F: { name: 'Fahrenheit (°F)' },
+                K: { name: 'Kelvin (K)' }
+            },
+            area: {
+                sqm: { name: 'Metri quadri (m²)', ratio: 1 },
+                sqkm: { name: 'Chilometri quadri (km²)', ratio: 1000000 },
+                sqcm: { name: 'Centimetri quadri (cm²)', ratio: 0.0001 },
+                ha: { name: 'Ettari (ha)', ratio: 10000 },
+                ac: { name: 'Acri (ac)', ratio: 4046.85642 },
+                sqft: { name: 'Piedi quadri (ft²)', ratio: 0.09290304 },
+                sqin: { name: 'Pollici quadri (in²)', ratio: 0.00064516 }
+            },
+            data: {
+                B: { name: 'Byte (B)', ratio: 1 },
+                KB: { name: 'Kilobyte (KB)', ratio: 1024 },
+                MB: { name: 'Megabyte (MB)', ratio: 1048576 },
+                GB: { name: 'Gigabyte (GB)', ratio: 1073741824 },
+                TB: { name: 'Terabyte (TB)', ratio: 1099511627776 },
+                PB: { name: 'Petabyte (PB)', ratio: 1125899906842624 },
+                b: { name: 'Bit (bit)', ratio: 0.125 },
+                Kb: { name: 'Kilobit (Kb)', ratio: 128 },
+                Mb: { name: 'Megabit (Mb)', ratio: 131072 },
+                Gb: { name: 'Gigabit (Gb)', ratio: 134217728 }
+            },
+            current: {
+                A: { name: 'Ampere (A)', ratio: 1 },
+                mA: { name: 'Milliampere (mA)', ratio: 0.001 },
+                uA: { name: 'Microampere (µA)', ratio: 0.000001 },
+                kA: { name: 'Kiloampere (kA)', ratio: 1000 },
+                statA: { name: 'Statampere (statA)', ratio: 3.33564e-10 },
+                abA: { name: 'Abampere (abA)', ratio: 10 }
+            }
+        };
+
+        function onCategoryChange() {
+            populateConverterOptions();
+            runConversion();
+        }
+
+        function populateConverterOptions() {
+            const cat = document.getElementById('conv-category').value;
+            const fromSelect = document.getElementById('conv-from');
+            const toSelect = document.getElementById('conv-to');
+            fromSelect.innerHTML = '';
+            toSelect.innerHTML = '';
+
+            const list = converterData[cat];
+            for (let k in list) {
+                fromSelect.add(new Option(list[k].name, k));
+                toSelect.add(new Option(list[k].name, k));
+            }
+            if (toSelect.options.length > 1) {
+                toSelect.selectedIndex = 1;
+            }
+        }
+
+        function runConversion() {
+            const cat = document.getElementById('conv-category').value;
+            const val = parseFloat(document.getElementById('conv-input').value) || 0;
+            const from = document.getElementById('conv-from').value;
+            const to = document.getElementById('conv-to').value;
+            let res = 0;
+
+            if (cat === 'temp') {
+                let c = val;
+                if (from === 'F') c = (val - 32) * (5 / 9);
+                if (from === 'K') c = val - 273.15;
+
+                if (to === 'C') res = c;
+                else if (to === 'F') res = (c * (9 / 5)) + 32;
+                else if (to === 'K') res = c + 273.15;
+            } else {
+                const units = converterData[cat];
+                const base = val * units[from].ratio;
+                res = base / units[to].ratio;
+            }
+
+            document.getElementById('conv-output').innerText = parseFloat(res.toFixed(8));
+        }
+
+        function swapUnits() {
+            const f = document.getElementById('conv-from');
+            const t = document.getElementById('conv-to');
+            const tmp = f.value;
+            f.value = t.value;
+            t.value = tmp;
+            runConversion();
+        }
+
+        // --- GESTIONE SCHEDE (PILL CONTROL) ---
+        function switchTab(tab) {
+            const vStd = document.getElementById('view-standard');
+            const vSci = document.getElementById('view-scientific');
+            const vConv = document.getElementById('view-converter');
+
+            const pStd = document.getElementById('pill-std');
+            const pSci = document.getElementById('pill-sci');
+            const pConv = document.getElementById('pill-conv');
+
+            vStd.classList.add('hidden');
+            vSci.classList.add('hidden');
+            vConv.classList.add('hidden');
+
+            const inactiveClass = "flex-1 py-1.5 rounded-full text-xs font-medium text-gray-400 transition-all duration-200 bg-transparent shadow-none";
+            const activeClass = "flex-1 py-1.5 rounded-full text-xs font-semibold bg-neonGreen text-black shadow-md transition-all duration-200";
+
+            pStd.className = inactiveClass;
+            pSci.className = inactiveClass;
+            pConv.className = inactiveClass;
+
+            if (tab === 'standard') {
+                vStd.classList.remove('hidden');
+                pStd.className = activeClass;
+            } else if (tab === 'scientific') {
+                vSci.classList.remove('hidden');
+                pSci.className = activeClass;
+            } else if (tab === 'converter') {
+                vConv.classList.remove('hidden');
+                pConv.className = activeClass;
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.opacity = '1';
+            setTimeout(() => { t.style.opacity = '0'; }, 2000);
+        }
+
+        window.onload = function() {
+            populateConverterOptions();
+            runConversion();
+            updateSci();
+        };
+    </script>
+
+<a class="home-return" href="index.html" aria-label="Torna alla Home" title="Torna alla Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg></a>
+</body>
+</html>

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Clock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neonGreen: '#00FF22',
+                        darkBg: '#0A0B0E',
+                        cardDark: '#14161C',
+                        btnDark: '#20242D',
+                        btnSlate: '#2C323E',
+                        pillBg: '#12141A'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+            user-select: none;
+        }
+        body {
+            background-color: #0A0B0E;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        .neon-glow {
+            box-shadow: 0 0 16px rgba(0, 255, 34, 0.4);
+        }
+        .neon-text-glow {
+            text-shadow: 0 0 12px rgba(0, 255, 34, 0.6);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .tab-btn {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.4rem 0.6rem;
+            border-radius: 9999px;
+            transition: all 0.2s ease;
+            color: #9CA3AF;
+        }
+        .tab-btn.active {
+            background-color: #00FF22;
+            color: #000000;
+            font-weight: 800;
+            box-shadow: 0 0 10px rgba(0, 255, 34, 0.3);
+        }
+        .time-select-input {
+            background-color: #20242D;
+            color: #00FF22;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+            outline: none;
+            width: 3.5rem;
+            height: 3.2rem;
+        }
+        .time-select-input:focus {
+            border-color: #00FF22;
+            box-shadow: 0 0 8px rgba(0, 255, 34, 0.4);
+        }
+    
+/* Pulsante Home in stile iOS */
+.home-return{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;width:86px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(38,38,42,.76);color:#fff;text-decoration:none;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 4px 22px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.12);transition:transform .15s,background .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.home-return:active{transform:translateX(-50%) scale(.94);background:rgba(65,65,70,.9)}
+.home-return svg{width:18px;height:18px;display:block}
+/* Lascia spazio al controllo in basso ed evita che la pagina venga ingrandita automaticamente. */
+body{padding-bottom:max(56px,calc(48px + env(safe-area-inset-bottom))) !important}
+@media(hover:hover){.home-return:hover{background:rgba(65,65,70,.9)}}
+
+</style>
+</head>
+<body class="h-full flex flex-col max-w-md mx-auto relative bg-darkBg text-white px-3 pt-3 pb-3">
+
+    <header class="w-full flex justify-center pb-3 pt-1 z-30">
+        <div class="bg-pillBg border border-white/10 px-1.5 py-1.5 rounded-full flex items-center justify-between w-full shadow-lg">
+            <button onclick="switchTab('clock')" id="tab-clock" class="tab-btn active flex-1 text-center truncate">
+                Orologio
+            </button>
+            <button onclick="switchTab('stopwatch')" id="tab-stopwatch" class="tab-btn flex-1 text-center truncate">
+                Cronometro
+            </button>
+            <button onclick="switchTab('timer')" id="tab-timer" class="tab-btn flex-1 text-center truncate">
+                Timer
+            </button>
+            <button onclick="switchTab('alarms')" id="tab-alarms" class="tab-btn flex-1 text-center truncate">
+                Sveglie
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col w-full relative overflow-hidden">
+
+        <section id="view-clock" class="flex-1 flex flex-col items-center justify-between space-y-3">
+            
+            <div class="w-full bg-cardDark border border-white/10 p-2 rounded-2xl flex items-center justify-between">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2">Stile Orologio</span>
+                <div class="flex items-center gap-1">
+                    <button onclick="setClockStyle('neon')" id="style-neon" class="px-2.5 py-1 text-[11px] font-bold rounded-xl border border-neonGreen text-neonGreen bg-neonGreen/10">Default</button>
+                    <button onclick="setClockStyle('digital')" id="style-digital" class="px-2.5 py-1 text-[11px] font-bold rounded-xl border border-white/10 text-gray-400 bg-btnDark">Digitale</button>
+                    <button onclick="setClockStyle('orbit')" id="style-orbit" class="px-2.5 py-1 text-[11px] font-bold rounded-xl border border-white/10 text-gray-400 bg-btnDark">Anelli</button>
+                    <button onclick="setClockStyle('classic')" id="style-classic" class="px-2.5 py-1 text-[11px] font-bold rounded-xl border border-white/10 text-gray-400 bg-btnDark">Classico</button>
+                </div>
+            </div>
+
+            <div class="flex-1 w-full flex items-center justify-center py-2 relative">
+                
+                <div id="clock-display-neon" class="w-64 h-64 relative flex items-center justify-center">
+                    <svg viewBox="0 0 200 200" class="w-full h-full">
+                        <circle cx="100" cy="100" r="94" fill="#14161C" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#00FF22" stroke-width="1.5" stroke-opacity="0.25"/>
+                        <circle cx="100" cy="100" r="4" fill="#00FF22" class="neon-glow"/>
+                        
+                        <g opacity="0.6">
+                            <line x1="100" y1="14" x2="100" y2="22" stroke="#00FF22" stroke-width="3"/>
+                            <line x1="186" y1="100" x2="178" y2="100" stroke="#00FF22" stroke-width="3"/>
+                            <line x1="100" y1="186" x2="100" y2="178" stroke="#00FF22" stroke-width="3"/>
+                            <line x1="14" y1="100" x2="22" y2="100" stroke="#00FF22" stroke-width="3"/>
+                        </g>
+
+                        <line id="neon-hand-hour" x1="100" y1="100" x2="100" y2="50" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+                        <line id="neon-hand-minute" x1="100" y1="100" x2="100" y2="30" stroke="#00FF22" stroke-width="3.5" stroke-linecap="round"/>
+                        <line id="neon-hand-second" x1="100" y1="100" x2="100" y2="20" stroke="#00FF22" stroke-width="1.5" stroke-dasharray="80 20"/>
+                        <circle cx="100" cy="100" r="2" fill="#000000"/>
+                    </svg>
+                </div>
+
+                <div id="clock-display-digital" class="hidden w-full flex flex-col items-center justify-center bg-cardDark border border-white/10 rounded-3xl p-6 space-y-3">
+                    <div id="digital-date" class="text-xs font-mono tracking-widest text-gray-400 uppercase">---</div>
+                    <div id="digital-time" class="text-5xl font-black font-mono tracking-tighter text-white neon-text-glow">00:00:00</div>
+                    <div class="w-full bg-btnDark h-2 rounded-full overflow-hidden border border-white/5">
+                        <div id="digital-sec-bar" class="bg-neonGreen h-full w-0 transition-all duration-300 neon-glow"></div>
+                    </div>
+                </div>
+
+                <div id="clock-display-orbit" class="hidden w-64 h-64 relative flex items-center justify-center">
+                    <svg viewBox="0 0 200 200" class="w-full h-full">
+                        <circle cx="100" cy="100" r="88" fill="none" stroke="#20242D" stroke-width="8"/>
+                        <circle id="orbit-ring-hour" cx="100" cy="100" r="88" fill="none" stroke="#ffffff" stroke-width="8" stroke-dasharray="553" stroke-dashoffset="200" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+
+                        <circle cx="100" cy="100" r="68" fill="none" stroke="#20242D" stroke-width="8"/>
+                        <circle id="orbit-ring-min" cx="100" cy="100" r="68" fill="none" stroke="#00FF22" stroke-width="8" stroke-dasharray="427" stroke-dashoffset="100" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+
+                        <circle cx="100" cy="100" r="48" fill="none" stroke="#20242D" stroke-width="6"/>
+                        <circle id="orbit-ring-sec" cx="100" cy="100" r="48" fill="none" stroke="#00FF22" stroke-opacity="0.6" stroke-width="6" stroke-dasharray="301" stroke-dashoffset="50" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+
+                        <text id="orbit-text-time" x="100" y="105" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="900" font-family="monospace">00:00</text>
+                    </svg>
+                </div>
+
+                <div id="clock-display-classic" class="hidden w-64 h-64 relative flex items-center justify-center">
+                    <svg viewBox="0 0 200 200" class="w-full h-full">
+                        <circle cx="100" cy="100" r="94" fill="#14161C" stroke="#2C323E" stroke-width="4"/>
+                        <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        
+                        <text x="100" y="32" text-anchor="middle" fill="#E5E7EB" font-size="14" font-weight="800">XII</text>
+                        <text x="172" y="105" text-anchor="middle" fill="#E5E7EB" font-size="14" font-weight="800">III</text>
+                        <text x="100" y="178" text-anchor="middle" fill="#E5E7EB" font-size="14" font-weight="800">VI</text>
+                        <text x="28" y="105" text-anchor="middle" fill="#E5E7EB" font-size="14" font-weight="800">IX</text>
+
+                        <line id="classic-hand-hour" x1="100" y1="100" x2="100" y2="55" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+                        <line id="classic-hand-minute" x1="100" y1="100" x2="100" y2="35" stroke="#E5E7EB" stroke-width="2.5" stroke-linecap="round"/>
+                        <line id="classic-hand-second" x1="100" y1="100" x2="100" y2="25" stroke="#00FF22" stroke-width="1.5"/>
+                        <circle cx="100" cy="100" r="3" fill="#00FF22"/>
+                    </svg>
+                </div>
+
+            </div>
+
+            <div class="w-full bg-cardDark border border-white/10 rounded-2xl p-3 space-y-2">
+                <div class="flex items-center justify-between pb-1 border-b border-white/5">
+                    <span class="text-xs font-extrabold text-neonGreen uppercase tracking-wider">Fusi orari nel mondo</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div class="bg-btnDark border border-white/5 p-2 rounded-xl flex justify-between items-center">
+                        <span class="text-gray-300 font-bold">Roma</span>
+                        <strong id="world-rome" class="text-white">00:00</strong>
+                    </div>
+                    <div class="bg-btnDark border border-white/5 p-2 rounded-xl flex justify-between items-center">
+                        <span class="text-gray-300 font-bold">Londra</span>
+                        <strong id="world-london" class="text-white">00:00</strong>
+                    </div>
+                    <div class="bg-btnDark border border-white/5 p-2 rounded-xl flex justify-between items-center">
+                        <span class="text-gray-300 font-bold">New York</span>
+                        <strong id="world-ny" class="text-white">00:00</strong>
+                    </div>
+                    <div class="bg-btnDark border border-white/5 p-2 rounded-xl flex justify-between items-center">
+                        <span class="text-gray-300 font-bold">Tokyo</span>
+                        <strong id="world-tokyo" class="text-white">00:00</strong>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="view-stopwatch" class="hidden flex-1 flex flex-col justify-between space-y-3">
+            <div class="bg-cardDark border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center space-y-2">
+                <span class="text-[10px] font-mono tracking-widest text-gray-400 uppercase">TEMPO TRASCORSO</span>
+                <div id="sw-display" class="text-5xl font-black font-mono tracking-tight text-white neon-text-glow">00:00.00</div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="lapStopwatch()" id="sw-lap-btn" disabled class="flex-1 bg-btnDark opacity-50 border border-white/10 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition">
+                    <svg class="w-4 h-4 text-neonGreen" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Giro
+                </button>
+                <button onclick="toggleStopwatch()" id="sw-toggle-btn" class="flex-1 bg-neonGreen text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 neon-glow active:scale-95 transition">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                    Avvia
+                </button>
+                <button onclick="resetStopwatch()" id="sw-reset-btn" class="bg-btnDark border border-white/10 text-gray-300 font-bold p-3.5 rounded-2xl active:scale-95 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+            </div>
+
+            <div class="flex-1 bg-cardDark border border-white/10 rounded-2xl p-3 overflow-y-auto no-scrollbar space-y-1.5 min-h-[160px]">
+                <div class="flex justify-between items-center text-[10px] text-gray-400 font-mono pb-1 border-b border-white/5 px-2">
+                    <span>GIRO</span>
+                    <span>SPLIT</span>
+                </div>
+                <div id="sw-laps-list" class="space-y-1.5 font-mono text-xs"></div>
+            </div>
+        </section>
+
+        <section id="view-timer" class="hidden flex-1 flex flex-col justify-between space-y-3">
+            
+            <div id="timer-inputs-container" class="bg-cardDark border border-white/10 rounded-3xl p-5 flex flex-col items-center space-y-4">
+                <span class="text-[10px] font-mono tracking-widest text-gray-400 uppercase">IMPOSTA TIMER</span>
+                <div class="flex items-center gap-2">
+                    <div class="flex flex-col items-center">
+                        <input type="number" id="timer-hh" min="0" max="23" value="00" onblur="padInput(this)" class="time-select-input">
+                        <span class="text-[9px] font-mono text-gray-400 mt-1">ORE</span>
+                    </div>
+                    <span class="text-xl font-bold text-neonGreen">:</span>
+                    <div class="flex flex-col items-center">
+                        <input type="number" id="timer-mm" min="0" max="59" value="05" onblur="padInput(this)" class="time-select-input">
+                        <span class="text-[9px] font-mono text-gray-400 mt-1">MIN</span>
+                    </div>
+                    <span class="text-xl font-bold text-neonGreen">:</span>
+                    <div class="flex flex-col items-center">
+                        <input type="number" id="timer-ss" min="0" max="59" value="00" onblur="padInput(this)" class="time-select-input">
+                        <span class="text-[9px] font-mono text-gray-400 mt-1">SEC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="timer-progress-container" class="flex-1 hidden w-full flex items-center justify-center relative py-2">
+                <div class="w-60 h-60 relative flex items-center justify-center">
+                    <svg viewBox="0 0 200 200" class="w-full h-full">
+                        <circle cx="100" cy="100" r="88" fill="none" stroke="#20242D" stroke-width="10"/>
+                        <circle id="timer-ring-progress" cx="100" cy="100" r="88" fill="none" stroke="#00FF22" stroke-width="10" stroke-dasharray="553" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 100 100)" class="transition-all duration-300"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <div id="timer-display-time" class="text-4xl font-black font-mono text-white neon-text-glow">00:00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTimer()" id="timer-start-btn" class="flex-1 bg-neonGreen text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 neon-glow active:scale-95 transition">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                    Avvia Timer
+                </button>
+                <button onclick="resetTimer()" id="timer-reset-btn" class="bg-btnDark border border-white/10 text-gray-300 font-bold p-3.5 rounded-2xl active:scale-95 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+            </div>
+        </section>
+
+        <section id="view-alarms" class="hidden flex-1 flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between bg-cardDark border border-white/10 p-2.5 rounded-2xl">
+                <span class="text-xs font-bold text-gray-300 pl-2">Gestione Sveglie</span>
+                <button onclick="openAddAlarmModal()" class="bg-neonGreen text-black font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-md flex items-center gap-1 active:scale-95 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                    Nuova Sveglia
+                </button>
+            </div>
+
+            <div id="alarms-list" class="flex-1 overflow-y-auto no-scrollbar space-y-2 py-1"></div>
+        </section>
+
+    </main>
+
+    <div id="modal-alarm" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-cardDark border border-white/15 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="font-bold text-lg text-white">Nuova Sveglia</h3>
+                <button onclick="closeAddAlarmModal()" class="text-gray-400 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="flex justify-center items-center gap-2 py-2">
+                <input type="number" id="alarm-hh" min="0" max="23" value="07" onblur="padInput(this)" class="time-select-input">
+                <span class="text-xl font-bold text-neonGreen">:</span>
+                <input type="number" id="alarm-mm" min="0" max="59" value="30" onblur="padInput(this)" class="time-select-input">
+            </div>
+
+            <input type="text" id="alarm-label" placeholder="Tag" class="w-full bg-btnDark border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-neonGreen">
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeAddAlarmModal()" class="flex-1 bg-btnDark text-gray-300 font-bold py-2.5 rounded-xl border border-white/10">Annulla</button>
+                <button onclick="saveNewAlarm()" class="flex-1 bg-neonGreen text-black font-extrabold py-2.5 rounded-xl neon-glow">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 bg-btnSlate border border-neonGreen/50 text-white px-4 py-2 rounded-full text-xs shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50">
+        Notifica
+    </div>
+
+    <script>
+        let activeTab = 'clock';
+        let currentClockStyle = 'neon';
+
+        let swInterval = null;
+        let swStartTime = 0;
+        let swElapsedTime = 0;
+        let swIsRunning = false;
+        let swLaps = [];
+
+        let timerInterval = null;
+        let timerTotalSec = 0;
+        let timerRemainingSec = 0;
+        let timerIsRunning = false;
+
+        let alarms = JSON.parse(localStorage.getItem('clock_alarms') || '[]');
+
+        function switchTab(tab) {
+            activeTab = tab;
+            ['clock', 'stopwatch', 'timer', 'alarms'].forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    view.classList.remove('hidden');
+                    btn.classList.add('active');
+                } else {
+                    view.classList.add('hidden');
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function setClockStyle(style) {
+            currentClockStyle = style;
+            ['neon', 'digital', 'orbit', 'classic'].forEach(s => {
+                const el = document.getElementById(`clock-display-${s}`);
+                const btn = document.getElementById(`style-${s}`);
+                if (s === style) {
+                    el.classList.remove('hidden');
+                    btn.className = "px-2.5 py-1 text-[11px] font-bold rounded-xl border border-neonGreen text-neonGreen bg-neonGreen/10";
+                } else {
+                    el.classList.add('hidden');
+                    btn.className = "px-2.5 py-1 text-[11px] font-bold rounded-xl border border-white/10 text-gray-400 bg-btnDark";
+                }
+            });
+            updateClockDisplay();
+        }
+
+        function updateClockDisplay() {
+            const now = new Date();
+            const hrs = now.getHours();
+            const mins = now.getMinutes();
+            const secs = now.getSeconds();
+
+            const secDeg = (secs / 60) * 360;
+            const minDeg = ((mins + secs / 60) / 60) * 360;
+            const hrDeg = (((hrs % 12) + mins / 60) / 12) * 360;
+
+            if (currentClockStyle === 'neon') {
+                setRotate('neon-hand-second', secDeg);
+                setRotate('neon-hand-minute', minDeg);
+                setRotate('neon-hand-hour', hrDeg);
+            } else if (currentClockStyle === 'classic') {
+                setRotate('classic-hand-second', secDeg);
+                setRotate('classic-hand-minute', minDeg);
+                setRotate('classic-hand-hour', hrDeg);
+            } else if (currentClockStyle === 'digital') {
+                document.getElementById('digital-time').innerText = now.toLocaleTimeString('it-IT');
+                document.getElementById('digital-date').innerText = now.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+                document.getElementById('digital-sec-bar').style.width = `${(secs / 60) * 100}%`;
+            } else if (currentClockStyle === 'orbit') {
+                const secDash = 301 - (secs / 60) * 301;
+                const minDash = 427 - (mins / 60) * 427;
+                const hrDash = 553 - ((hrs % 12) / 12) * 553;
+                document.getElementById('orbit-ring-sec').style.strokeDashoffset = secDash;
+                document.getElementById('orbit-ring-min').style.strokeDashoffset = minDash;
+                document.getElementById('orbit-ring-hour').style.strokeDashoffset = hrDash;
+                document.getElementById('orbit-text-time').textContent = `${pad(hrs)}:${pad(mins)}`;
+            }
+
+            const getTZTime = (tz) => new Date().toLocaleTimeString('it-IT', { timeZone: tz, hour: '2-digit', minute: '2-digit' });
+            document.getElementById('world-rome').innerText = getTZTime('Europe/Rome');
+            document.getElementById('world-london').innerText = getTZTime('Europe/London');
+            document.getElementById('world-ny').innerText = getTZTime('America/New_York');
+            document.getElementById('world-tokyo').innerText = getTZTime('Asia/Tokyo');
+
+            checkAlarms(hrs, mins, secs);
+        }
+
+        function setRotate(id, deg) {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute('transform', `rotate(${deg} 100 100)`);
+        }
+
+        function toggleStopwatch() {
+            const btn = document.getElementById('sw-toggle-btn');
+            const lapBtn = document.getElementById('sw-lap-btn');
+
+            if (!swIsRunning) {
+                swIsRunning = true;
+                swStartTime = Date.now() - swElapsedTime;
+                swInterval = setInterval(updateStopwatch, 10);
+                btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>Pausa`;
+                btn.className = "flex-1 bg-yellow-400 text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition";
+                lapBtn.disabled = false;
+                lapBtn.classList.remove('opacity-50');
+            } else {
+                swIsRunning = false;
+                clearInterval(swInterval);
+                btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Riprendi`;
+                btn.className = "flex-1 bg-neonGreen text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 neon-glow active:scale-95 transition";
+            }
+        }
+
+        function updateStopwatch() {
+            swElapsedTime = Date.now() - swStartTime;
+            document.getElementById('sw-display').innerText = formatSWTime(swElapsedTime);
+        }
+
+        function resetStopwatch() {
+            swIsRunning = false;
+            clearInterval(swInterval);
+            swElapsedTime = 0;
+            swLaps = [];
+            document.getElementById('sw-display').innerText = "00:00.00";
+            document.getElementById('sw-laps-list').innerHTML = "";
+            const btn = document.getElementById('sw-toggle-btn');
+            btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Avvia`;
+            btn.className = "flex-1 bg-neonGreen text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 neon-glow active:scale-95 transition";
+            const lapBtn = document.getElementById('sw-lap-btn');
+            lapBtn.disabled = true;
+            lapBtn.classList.add('opacity-50');
+        }
+
+        function lapStopwatch() {
+            if (!swIsRunning) return;
+            swLaps.unshift(swElapsedTime);
+            renderLaps();
+        }
+
+        function renderLaps() {
+            const list = document.getElementById('sw-laps-list');
+            list.innerHTML = "";
+            swLaps.forEach((lap, idx) => {
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-btnDark p-2 rounded-xl border border-white/5";
+                item.innerHTML = `
+                    <span class="text-gray-400 font-bold">Giro ${swLaps.length - idx}</span>
+                    <span class="text-neonGreen font-bold">${formatSWTime(lap)}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function formatSWTime(ms) {
+            const m = Math.floor(ms / 60000);
+            const s = Math.floor((ms % 60000) / 1000);
+            const cs = Math.floor((ms % 1000) / 10);
+            return `${pad(m)}:${pad(s)}.${pad(cs)}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-start-btn');
+            const inputsCont = document.getElementById('timer-inputs-container');
+            const progCont = document.getElementById('timer-progress-container');
+
+            if (!timerIsRunning) {
+                if (timerRemainingSec <= 0) {
+                    const hh = parseInt(document.getElementById('timer-hh').value) || 0;
+                    const mm = parseInt(document.getElementById('timer-mm').value) || 0;
+                    const ss = parseInt(document.getElementById('timer-ss').value) || 0;
+                    timerTotalSec = hh * 3600 + mm * 60 + ss;
+                    timerRemainingSec = timerTotalSec;
+                }
+
+                if (timerTotalSec <= 0) return showToast("Imposta un tempo per il timer");
+
+                timerIsRunning = true;
+                inputsCont.classList.add('hidden');
+                progCont.classList.remove('hidden');
+
+                btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>Pausa`;
+                btn.className = "flex-1 bg-yellow-400 text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition";
+
+                timerInterval = setInterval(updateTimer, 1000);
+                updateTimerDisplay();
+            } else {
+                timerIsRunning = false;
+                clearInterval(timerInterval);
+                btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Riprendi`;
+                btn.className = "flex-1 bg-neonGreen text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 neon-glow active:scale-95 transition";
+            }
+        }
+
+        function updateTimer() {
+            if (timerRemainingSec > 0) {
+                timerRemainingSec--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(timerInterval);
+                timerIsRunning = false;
+                playBeep();
+                showToast("Timer Scaduto!");
+                resetTimer();
+            }
+        }
+
+        function updateTimerDisplay() {
+            const h = Math.floor(timerRemainingSec / 3600);
+            const m = Math.floor((timerRemainingSec % 3600) / 60);
+            const s = timerRemainingSec % 60;
+            document.getElementById('timer-display-time').innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
+            const offset = 553 - (timerRemainingSec / timerTotalSec) * 553;
+            document.getElementById('timer-ring-progress').style.strokeDashoffset = offset;
+        }
+
+        function resetTimer() {
+            timerIsRunning = false;
+            clearInterval(timerInterval);
+            timerRemainingSec = 0;
+            timerTotalSec = 0;
+            document.getElementById('timer-inputs-container').classList.remove('hidden');
+            document.getElementById('timer-progress-container').classList.add('hidden');
+            const btn = document.getElementById('timer-start-btn');
+            btn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Avvia Timer`;
+            btn.className = "flex-1 bg-neonGreen text-black font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-2 neon-glow active:scale-95 transition";
+        }
+
+        function openAddAlarmModal() {
+            document.getElementById('modal-alarm').classList.remove('hidden');
+        }
+
+        function closeAddAlarmModal() {
+            document.getElementById('modal-alarm').classList.add('hidden');
+        }
+
+        function saveNewAlarm() {
+            const hh = pad(parseInt(document.getElementById('alarm-hh').value) || 0);
+            const mm = pad(parseInt(document.getElementById('alarm-mm').value) || 0);
+            const label = document.getElementById('alarm-label').value.trim() || 'Sveglia';
+
+            alarms.push({
+                id: Date.now(),
+                time: `${hh}:${mm}`,
+                label: label,
+                enabled: true
+            });
+
+            localStorage.setItem('clock_alarms', JSON.stringify(alarms));
+            renderAlarms();
+            closeAddAlarmModal();
+            showToast("Sveglia salvata");
+        }
+
+        function toggleAlarm(id) {
+            const alarm = alarms.find(a => a.id === id);
+            if (alarm) {
+                alarm.enabled = !alarm.enabled;
+                localStorage.setItem('clock_alarms', JSON.stringify(alarms));
+                renderAlarms();
+            }
+        }
+
+        function deleteAlarm(id) {
+            alarms = alarms.filter(a => a.id !== id);
+            localStorage.setItem('clock_alarms', JSON.stringify(alarms));
+            renderAlarms();
+            showToast("Sveglia eliminata");
+        }
+
+        function renderAlarms() {
+            const list = document.getElementById('alarms-list');
+            list.innerHTML = "";
+
+            if (alarms.length === 0) {
+                list.innerHTML = `<p class="text-xs text-gray-500 text-center py-8">Nessuna sveglia impostata.</p>`;
+                return;
+            }
+
+            alarms.forEach(a => {
+                const item = document.createElement('div');
+                item.className = "bg-cardDark border border-white/10 rounded-2xl p-3.5 flex items-center justify-between";
+                item.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-black font-mono ${a.enabled ? 'text-white' : 'text-gray-500'}">${a.time}</span>
+                        <span class="text-[11px] font-bold text-gray-400">${escapeHtml(a.label)}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleAlarm(${a.id})" class="w-12 h-6 rounded-full p-0.5 transition-colors ${a.enabled ? 'bg-neonGreen' : 'bg-btnDark border border-white/10'}">
+                            <div class="w-5 h-5 rounded-full bg-black shadow-md transform transition-transform ${a.enabled ? 'translate-x-6' : 'translate-x-0'}"></div>
+                        </button>
+                        <button onclick="deleteAlarm(${a.id})" class="text-red-400 p-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        let lastFiredMin = "";
+        function checkAlarms(h, m, s) {
+            if (s !== 0) return;
+            const currentTimeStr = `${pad(h)}:${pad(m)}`;
+            if (currentTimeStr === lastFiredMin) return;
+
+            alarms.forEach(a => {
+                if (a.enabled && a.time === currentTimeStr) {
+                    lastFiredMin = currentTimeStr;
+                    playBeep();
+                    showToast(`SVEGLIA: ${a.label}`);
+                }
+            });
+        }
+
+        function playBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 1.2);
+            } catch(e) {}
+        }
+
+        function pad(n) {
+            return n < 10 ? '0' + n : n;
+        }
+
+        function padInput(el) {
+            if (el.value !== '') el.value = pad(parseInt(el.value) || 0);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        window.onload = () => {
+            setInterval(updateClockDisplay, 1000);
+            updateClockDisplay();
+            renderAlarms();
+        };
+    </script>
+
+<a class="home-return" href="index.html" aria-label="Torna alla Home" title="Torna alla Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg></a>
+</body>
+</html>

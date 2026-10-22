@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Writ'r</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neonGreen: '#00FF22',
+                        darkBg: '#0B0B0D',
+                        cardDark: '#16171B',
+                        btnDark: '#202227',
+                        btnSlate: '#2A2C32',
+                        pillBg: '#141518',
+                        pageBg: '#121316'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #0B0B0D;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        .neon-glow {
+            box-shadow: 0 0 12px rgba(0, 255, 34, 0.35);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .doc-page {
+            background-color: #1A1C22;
+            color: #F1F5F9;
+            width: 100%;
+            min-height: 520px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            outline: none;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+            line-height: 1.6;
+        }
+        .doc-page ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        .doc-page ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        .doc-page h1 { font-size: 1.75rem; font-weight: 800; color: #ffffff; margin: 0.75rem 0 0.25rem 0; }
+        .doc-page h2 { font-size: 1.35rem; font-weight: 700; color: #f3f4f6; margin: 0.5rem 0 0.25rem 0; }
+        .doc-page h3 { font-size: 1.15rem; font-weight: 600; color: #e5e7eb; margin: 0.5rem 0 0.25rem 0; }
+        .doc-page p { margin-bottom: 0.5rem; }
+        .fmt-btn {
+            background-color: #202227;
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.6rem;
+            padding: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            min-width: 2rem;
+            height: 2rem;
+        }
+        .fmt-btn:active {
+            transform: scale(0.92);
+            background-color: #2A2C32;
+        }
+        .fmt-select {
+            background-color: #202227;
+            color: #00FF22;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.6rem;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+    
+/* Pulsante Home in stile iOS */
+.home-return{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;width:86px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(38,38,42,.76);color:#fff;text-decoration:none;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 4px 22px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.12);transition:transform .15s,background .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.home-return:active{transform:translateX(-50%) scale(.94);background:rgba(65,65,70,.9)}
+.home-return svg{width:18px;height:18px;display:block}
+/* Lascia spazio al controllo in basso ed evita che la pagina venga ingrandita automaticamente. */
+body{padding-bottom:max(56px,calc(48px + env(safe-area-inset-bottom))) !important}
+@media(hover:hover){.home-return:hover{background:rgba(65,65,70,.9)}}
+
+</style>
+</head>
+<body class="h-full flex flex-col max-w-md mx-auto relative bg-darkBg text-white px-3 pt-3 pb-3">
+
+    <header class="w-full flex justify-center pb-2">
+        <div class="bg-pillBg border border-white/10 px-4 py-1.5 rounded-full flex items-center justify-between w-full max-w-sm shadow-md">
+            <span class="text-[11px] font-extrabold tracking-widest text-neonGreen uppercase">Writ'r studio</span>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleLibrary()" class="text-[11px] font-bold text-gray-300 hover:text-white flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-neonGreen" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    I miei Writs
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col w-full max-w-md relative overflow-hidden">
+
+        <div id="screen-editor" class="flex flex-col h-full space-y-2">
+            
+            <div class="flex items-center justify-between bg-cardDark border border-white/10 p-2 rounded-2xl">
+                <input type="text" id="doc-title" placeholder="Nome Documento..." oninput="onDocInput()" class="bg-transparent text-white font-bold text-base px-2 py-1 w-full focus:outline-none">
+                <div class="flex items-center gap-1">
+                    <button onclick="openSummaryModal()" class="bg-neonGreen/10 border border-neonGreen/30 text-neonGreen text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95 transition flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Riassunto
+                    </button>
+                    <button onclick="toggleExportMenu()" class="bg-btnDark text-white border border-white/10 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95 transition flex items-center gap-1">
+                        Esporta
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="export-dropdown" class="hidden bg-cardDark border border-white/15 p-2 rounded-2xl flex flex-col space-y-1.5 z-20 shadow-2xl">
+                <span class="text-[10px] text-gray-400 font-bold px-2 uppercase tracking-wider">Seleziona Formato Esportazione</span>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button onclick="exportPDF()" class="bg-btnDark hover:bg-btnSlate text-neonGreen border border-white/10 p-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1">
+                        <span>PDF</span>
+                    </button>
+                    <button onclick="exportDOCX()" class="bg-btnDark hover:bg-btnSlate text-blue-400 border border-white/10 p-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1">
+                        <span>DOCX</span>
+                    </button>
+                    <button onclick="exportTXT()" class="bg-btnDark hover:bg-btnSlate text-yellow-400 border border-white/10 p-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1">
+                        <span>TXT</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-cardDark border border-white/10 rounded-2xl p-2 flex flex-col space-y-2">
+                <div class="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+                    <select id="font-family" onchange="changeFont(this.value)" class="fmt-select">
+                        <option value="Calibri">Calibri</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Courier New">Courier</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Trebuchet MS">Trebuchet</option>
+                    </select>
+
+                    <select id="font-size" onchange="changeFontSize(this.value)" class="fmt-select">
+                        <option value="3">12pt</option>
+                        <option value="4" selected>14pt</option>
+                        <option value="5">18pt</option>
+                        <option value="6">24pt</option>
+                        <option value="7">36pt</option>
+                    </select>
+
+                    <div class="flex items-center gap-1">
+                        <label title="Colore Testo" class="fmt-btn cursor-pointer relative">
+                            <span class="font-extrabold text-neonGreen">Colore testo</span>
+                            <input type="color" onchange="execCmd('foreColor', this.value)" value="#00FF22" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
+                        </label>
+                        <label title="Evidenziatore" class="fmt-btn cursor-pointer relative">
+                            <svg class="w-3.5 h-3.5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
+                            <input type="color" onchange="execCmd('hiliteColor', this.value)" value="#00FF22" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+                    <div class="flex items-center gap-1">
+                        <button onclick="execCmd('bold')" title="Grassetto" class="fmt-btn font-bold">B</button>
+                        <button onclick="execCmd('italic')" title="Corsivo" class="fmt-btn italic">I</button>
+                        <button onclick="execCmd('underline')" title="Sottolineato" class="fmt-btn underline">U</button>
+                        <button onclick="execCmd('strikeThrough')" title="Barrato" class="fmt-btn line-through">S</button>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                        <button onclick="execCmd('insertUnorderedList')" title="Puntato" class="fmt-btn">•••</button>
+                        <button onclick="execCmd('insertOrderedList')" title="Numerato" class="fmt-btn">123</button>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                        <button onclick="execCmd('justifyLeft')" title="Sinistra" class="fmt-btn">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h10M4 18h14"></path></svg>
+                        </button>
+                        <button onclick="execCmd('justifyCenter')" title="Centro" class="fmt-btn">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M7 12h10M5 18h14"></path></svg>
+                        </button>
+                        <button onclick="execCmd('justifyRight')" title="Destra" class="fmt-btn">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M10 12h10M6 18h14"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-pageBg border border-white/5 rounded-2xl p-2 overflow-y-auto no-scrollbar space-y-4" id="pages-container">
+                <div class="flex justify-between items-center px-2">
+                    <span class="text-[10px] text-gray-500 font-mono">PAGINA 1 DI 1</span>
+                    <button onclick="addNewPage()" class="text-xs text-neonGreen font-bold flex items-center gap-1 bg-cardDark border border-white/10 px-2.5 py-1 rounded-xl active:scale-95 transition">
+                        Nuova Pagina
+                    </button>
+                </div>
+                <div id="editor-page-1" class="doc-page" contenteditable="true" oninput="onDocInput()"></div>
+            </div>
+
+            <div class="bg-cardDark border border-white/10 rounded-2xl px-4 py-2 flex items-center justify-between text-xs font-mono">
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-400">Parole: <strong id="doc-words" class="text-neonGreen">0</strong></span>
+                    <span class="text-gray-400">Pagine: <strong id="doc-pages-count" class="text-neonGreen">1</strong></span>
+                </div>
+                <span id="save-status" class="text-[10px] text-gray-500 uppercase tracking-widest">Salvato</span>
+            </div>
+        </div>
+
+        <div id="screen-library" class="fixed inset-0 bg-darkBg/95 backdrop-blur-lg z-40 flex flex-col p-4 transition-all duration-300 transform translate-x-full">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-neonGreen" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    I miei Writs
+                </h2>
+                <button onclick="toggleLibrary()" class="bg-cardDark text-gray-300 p-2 rounded-full border border-white/10">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="py-3 flex items-center justify-between">
+                <button onclick="createNewDocument()" class="w-full bg-neonGreen text-black font-extrabold text-sm py-3 rounded-2xl shadow-lg flex items-center justify-center gap-2 neon-glow active:scale-95 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                    crea nuovo Writs
+                </button>
+            </div>
+
+            <div id="library-list" class="flex-1 overflow-y-auto no-scrollbar space-y-2.5 py-2"></div>
+        </div>
+
+        <div id="modal-summary" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-cardDark border border-white/15 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl relative">
+                <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                    <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-neonGreen" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Controllo Riassunto
+                    </h3>
+                    <button onclick="closeSummaryModal()" class="text-gray-400 p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center font-mono">
+                    <div class="bg-btnDark p-2 rounded-xl border border-white/5">
+                        <span class="block text-[10px] text-gray-400">PAROLE</span>
+                        <strong id="sum-words" class="text-neonGreen text-sm">0</strong>
+                    </div>
+                    <div class="bg-btnDark p-2 rounded-xl border border-white/5">
+                        <span class="block text-[10px] text-gray-400">CARATTERI</span>
+                        <strong id="sum-chars" class="text-neonGreen text-sm">0</strong>
+                    </div>
+                    <div class="bg-btnDark p-2 rounded-xl border border-white/5">
+                        <span class="block text-[10px] text-gray-400">LETTURA</span>
+                        <strong id="sum-time" class="text-neonGreen text-sm">0m</strong>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <span class="text-xs font-bold text-gray-300 uppercase tracking-wider">Key Points</span>
+                    <div id="summary-text" class="bg-btnDark border border-white/10 rounded-xl p-3 text-xs text-gray-300 max-h-48 overflow-y-auto leading-relaxed"></div>
+                </div>
+
+                <button onclick="closeSummaryModal()" class="w-full bg-btnSlate text-white font-bold text-xs py-2.5 rounded-xl border border-white/10">
+                    Chiudi
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-btnSlate border border-neonGreen/50 text-white px-4 py-2 rounded-full text-xs shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50">
+        Notifica
+    </div>
+
+    <script>
+        const DB_NAME = 'iPhoneWordDocsDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'documents';
+        let db = null;
+        let currentDocId = null;
+        let saveTimeout = null;
+        let pageCount = 1;
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+                req.onerror = (e) => reject(e);
+            });
+        }
+
+        function getAllDocs() {
+            return new Promise((resolve) => {
+                if (!db) return resolve([]);
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => resolve([]);
+            });
+        }
+
+        function saveDocToDB(doc) {
+            return new Promise((resolve) => {
+                if (!db) return resolve();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.put(doc);
+                tx.oncomplete = () => resolve();
+            });
+        }
+
+        function deleteDocFromDB(id) {
+            return new Promise((resolve) => {
+                if (!db) return resolve();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.delete(id);
+                tx.oncomplete = () => resolve();
+            });
+        }
+
+        async function initApp() {
+            await initDB();
+            const docs = await getAllDocs();
+            if (docs.length === 0) {
+                await createNewDocument();
+            } else {
+                docs.sort((a,b) => b.updatedAt - a.updatedAt);
+                openDocument(docs[0].id);
+            }
+        }
+
+        async function createNewDocument() {
+            const newDoc = {
+                id: Date.now().toString(),
+                title: 'Nuovo Writs',
+                pages: ['<p>Inizia qui a scrivere il tuo Writs!</p>'],
+                updatedAt: Date.now()
+            };
+            await saveDocToDB(newDoc);
+            await openDocument(newDoc.id);
+            toggleLibrary(false);
+            showToast("Nuovo writs creato");
+        }
+
+        async function openDocument(id) {
+            currentDocId = id;
+            const docs = await getAllDocs();
+            const doc = docs.find(d => d.id === id);
+            if (!doc) return;
+
+            document.getElementById('doc-title').value = doc.title || '';
+            const container = document.getElementById('pages-container');
+            container.innerHTML = '';
+
+            const pages = doc.pages && doc.pages.length > 0 ? doc.pages : [''];
+            pageCount = pages.length;
+
+            pages.forEach((content, index) => {
+                const pageNum = index + 1;
+                const pageWrapper = document.createElement('div');
+                pageWrapper.className = 'space-y-2';
+                pageWrapper.innerHTML = `
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-[10px] text-gray-500 font-mono">PAGINA ${pageNum} DI ${pageCount}</span>
+                        ${index === pages.length - 1 ? `
+                            <button onclick="addNewPage()" class="text-xs text-neonGreen font-bold flex items-center gap-1 bg-cardDark border border-white/10 px-2.5 py-1 rounded-xl active:scale-95 transition">
+                                + Nuova Pagina
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div id="editor-page-${pageNum}" class="doc-page" contenteditable="true" oninput="onDocInput()">${content}</div>
+                `;
+                container.appendChild(pageWrapper);
+            });
+
+            updateDocStats();
+            toggleLibrary(false);
+        }
+
+        function addNewPage() {
+            pageCount++;
+            const container = document.getElementById('pages-container');
+            const pageWrapper = document.createElement('div');
+            pageWrapper.className = 'space-y-2 pt-2';
+            pageWrapper.innerHTML = `
+                <div class="flex justify-between items-center px-2">
+                    <span class="text-[10px] text-gray-500 font-mono">PAGINA ${pageCount} DI ${pageCount}</span>
+                    <button onclick="addNewPage()" class="text-xs text-neonGreen font-bold flex items-center gap-1 bg-cardDark border border-white/10 px-2.5 py-1 rounded-xl active:scale-95 transition">
+                        + Nuova Pagina
+                    </button>
+                </div>
+                <div id="editor-page-${pageCount}" class="doc-page" contenteditable="true" oninput="onDocInput()"><p></p></div>
+            `;
+            container.appendChild(pageWrapper);
+            onDocInput();
+        }
+
+        function onDocInput() {
+            updateDocStats();
+            setSaveStatus("aggiorno...", true);
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveCurrentDocImmediate();
+            }, 400);
+        }
+
+        async function saveCurrentDocImmediate() {
+            if (!currentDocId) return;
+            const title = document.getElementById('doc-title').value;
+            const pages = [];
+            for (let i = 1; i <= pageCount; i++) {
+                const pageEl = document.getElementById(`editor-page-${i}`);
+                if (pageEl) {
+                    pages.push(pageEl.innerHTML);
+                }
+            }
+
+            const doc = {
+                id: currentDocId,
+                title: title,
+                pages: pages,
+                updatedAt: Date.now()
+            };
+
+            await saveDocToDB(doc);
+            setSaveStatus("salvato", false);
+        }
+
+        function updateDocStats() {
+            let totalWords = 0;
+            for (let i = 1; i <= pageCount; i++) {
+                const pageEl = document.getElementById(`editor-page-${i}`);
+                if (pageEl) {
+                    const text = pageEl.innerText.trim();
+                    if (text) totalWords += text.split(/\s+/).length;
+                }
+            }
+            document.getElementById('doc-words').innerText = totalWords;
+            document.getElementById('doc-pages-count').innerText = pageCount;
+        }
+
+        function execCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            onDocInput();
+        }
+
+        function changeFont(fontName) {
+            execCmd('fontName', fontName);
+        }
+
+        function changeFontSize(size) {
+            execCmd('fontSize', size);
+        }
+
+        async function toggleLibrary(forceOpen = null) {
+            const screen = document.getElementById('screen-library');
+            const isOpen = !screen.classList.contains('translate-x-full');
+            const shouldOpen = forceOpen !== null ? forceOpen : !isOpen;
+
+            if (shouldOpen) {
+                await renderLibraryList();
+                screen.classList.remove('translate-x-full');
+            } else {
+                screen.classList.add('translate-x-full');
+            }
+        }
+
+        async function renderLibraryList() {
+            const container = document.getElementById('library-list');
+            const docs = await getAllDocs();
+            container.innerHTML = '';
+
+            if (docs.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-500 text-center py-6">Nessun documento salvato.</p>';
+                return;
+            }
+
+            docs.sort((a,b) => b.updatedAt - a.updatedAt);
+
+            docs.forEach(doc => {
+                const title = doc.title.trim() || 'Senza Titolo';
+                const dateStr = new Date(doc.updatedAt).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                
+                const item = document.createElement('div');
+                item.className = `bg-cardDark border ${doc.id === currentDocId ? 'border-neonGreen' : 'border-white/10'} rounded-2xl p-3.5 flex items-center justify-between cursor-pointer active:scale-95 transition`;
+                item.onclick = () => openDocument(doc.id);
+                item.innerHTML = `
+                    <div class="flex flex-col space-y-1 truncate pr-2">
+                        <strong class="text-sm font-bold text-white truncate">${escapeHtml(title)}</strong>
+                        <span class="text-[10px] font-mono text-gray-400">${dateStr} • ${doc.pages ? doc.pages.length : 1} Pagina/e</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); deleteDoc('${doc.id}')" class="text-red-400 p-2 hover:bg-white/5 rounded-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function deleteDoc(id) {
+            await deleteDocFromDB(id);
+            showToast("Documento eliminato");
+            const docs = await getAllDocs();
+            if (docs.length > 0) {
+                openDocument(docs[0].id);
+            } else {
+                createNewDocument();
+            }
+            renderLibraryList();
+        }
+
+        function toggleExportMenu() {
+            const menu = document.getElementById('export-dropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        function exportPDF() {
+            toggleExportMenu();
+            showToast("Generazione PDF...");
+            const element = document.createElement('div');
+            element.style.padding = '20px';
+            element.style.color = '#000000';
+            element.style.background = '#ffffff';
+
+            for (let i = 1; i <= pageCount; i++) {
+                const p = document.getElementById(`editor-page-${i}`);
+                if (p) {
+                    const pageDiv = document.createElement('div');
+                    pageDiv.style.pageBreakAfter = 'always';
+                    pageDiv.innerHTML = p.innerHTML;
+                    element.appendChild(pageDiv);
+                }
+            }
+
+            const title = document.getElementById('doc-title').value || 'documento';
+            html2pdf().set({
+                margin: 10,
+                filename: `${title}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).save();
+        }
+
+        function exportDOCX() {
+            toggleExportMenu();
+            let fullHTML = "";
+            for (let i = 1; i <= pageCount; i++) {
+                const p = document.getElementById(`editor-page-${i}`);
+                if (p) fullHTML += p.innerHTML + "<br/><hr/><br/>";
+            }
+            const title = document.getElementById('doc-title').value || 'documento';
+            const blob = new Blob(['\ufeff' + fullHTML], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title}.doc`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("File Word scaricato!");
+        }
+
+        function exportTXT() {
+            toggleExportMenu();
+            let fullText = "";
+            for (let i = 1; i <= pageCount; i++) {
+                const p = document.getElementById(`editor-page-${i}`);
+                if (p) fullText += p.innerText + "\n\n--- PAGINA ---\n\n";
+            }
+            const title = document.getElementById('doc-title').value || 'documento';
+            const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("File TXT scaricato!");
+        }
+
+        function openSummaryModal() {
+            let fullText = "";
+            for (let i = 1; i <= pageCount; i++) {
+                const p = document.getElementById(`editor-page-${i}`);
+                if (p) fullText += p.innerText + " ";
+            }
+            
+            const textTrim = fullText.trim();
+            const words = textTrim ? textTrim.split(/\s+/).length : 0;
+            const chars = textTrim.length;
+            const readTime = Math.ceil(words / 200);
+
+            document.getElementById('sum-words').innerText = words;
+            document.getElementById('sum-chars').innerText = chars;
+            document.getElementById('sum-time').innerText = `${readTime}m`;
+
+            const sentences = textTrim.split(/[.!?]+/).filter(s => s.trim().length > 10);
+            let summaryHTML = "";
+
+            if (sentences.length === 0) {
+                summaryHTML = "<p>Nessun contenuto sufficiente per generare un riassunto.</p>";
+            } else {
+                const keyPoints = sentences.slice(0, 4);
+                summaryHTML = "<ul class='list-disc pl-4 space-y-1.5'>";
+                keyPoints.forEach(pt => {
+                    summaryHTML += `<li>${escapeHtml(pt.trim())}.</li>`;
+                });
+                summaryHTML += "</ul>";
+            }
+
+            document.getElementById('summary-text').innerHTML = summaryHTML;
+            document.getElementById('modal-summary').classList.remove('hidden');
+        }
+
+        function closeSummaryModal() {
+            document.getElementById('modal-summary').classList.add('hidden');
+        }
+
+        function setSaveStatus(msg, isSaving) {
+            const status = document.getElementById('save-status');
+            status.innerText = msg;
+            if (isSaving) {
+                status.classList.add('text-neonGreen');
+            } else {
+                status.classList.remove('text-neonGreen');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 1800);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        window.onload = initApp;
+    </script>
+
+<a class="home-return" href="index.html" aria-label="Torna alla Home" title="Torna alla Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg></a>
+</body>
+</html>

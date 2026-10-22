@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Recs</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #1c1c1e;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .timer-display {
+            font-size: 42px;
+            font-weight: 700;
+            font-family: monospace;
+            color: #00FF22;
+            letter-spacing: 2px;
+        }
+
+        .record-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background-color: transparent;
+            border: 2px solid #00FF22;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 255, 34, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .record-btn.recording {
+            background-color: #ff3b30;
+            border-color: #ff3b30;
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.4);
+        }
+
+        .record-inner {
+            width: 28px;
+            height: 28px;
+            background-color: #00FF22;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 255, 34, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .record-btn.recording .record-inner {
+            width: 26px;
+            height: 26px;
+            background-color: #ffffff;
+            border-radius: 6px;
+            box-shadow: none;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .input-group label {
+            font-size: 10px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .input-group input, .input-group select {
+            background-color: #2c2c2e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 10px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            user-select: text;
+        }
+
+        .memo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .memo-item {
+            background-color: #1c1c1e;
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .memo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .memo-title-input {
+            font-weight: 600;
+            font-size: 15px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            outline: none;
+            width: 100%;
+            user-select: text;
+        }
+
+        .memo-title-input:focus {
+            border-bottom: 1px solid #00FF22;
+        }
+
+        .memo-tag {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 8px;
+            background: #2c2c2e;
+            color: #00FF22;
+            white-space: nowrap;
+        }
+
+        audio {
+            width: 100%;
+            height: 36px;
+            accent-color: #00FF22;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: #ff3b30;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+        }
+    
+/* Pulsante Home in stile iOS */
+.home-return{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;width:86px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(38,38,42,.76);color:#fff;text-decoration:none;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 4px 22px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.12);transition:transform .15s,background .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.home-return:active{transform:translateX(-50%) scale(.94);background:rgba(65,65,70,.9)}
+.home-return svg{width:18px;height:18px;display:block}
+/* Lascia spazio al controllo in basso ed evita che la pagina venga ingrandita automaticamente. */
+body{padding-bottom:max(56px,calc(48px + env(safe-area-inset-bottom))) !important}
+@media(hover:hover){.home-return:hover{background:rgba(65,65,70,.9)}}
+
+</style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <h1 style="font-size: 22px; font-weight: 700; text-align: center; margin-top: 10px;">Memo Vocali</h1>
+
+        <div class="card">
+            <div class="timer-display" id="timer">00:00</div>
+            
+            <div class="input-row">
+                <div class="input-group" style="flex: 2;">
+                    <label>Titolo Recs</label>
+                    <input type="text" id="new-title" placeholder="Titolo...">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>Tag</label>
+                    <select id="new-tag">
+                        <option value="Personale">Personale</option>
+                        <option value="Lavoro">Lavoro</option>
+                        <option value="Studio">Studio</option>
+                        <option value="Idee">Creativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="record-btn" id="rec-btn" onclick="toggleRecording()">
+                <div class="record-inner"></div>
+            </button>
+        </div>
+
+        <div style="font-size: 14px; font-weight: 600; color: #8e8e93; margin-top: 6px;">I tuoi Recs</div>
+        
+        <div class="memo-list" id="memo-list"></div>
+
+    </div>
+
+    <script>
+        let db;
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let startTime;
+        let timerInterval;
+
+        function initIndexedDB() {
+            const request = indexedDB.open("VoiceMemosDB", 2);
+            request.onupgradeneeded = (e) => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains("memos")) {
+                    db.createObjectStore("memos", { keyPath: "id", autoIncrement: true });
+                }
+            };
+            request.onsuccess = (e) => {
+                db = e.target.result;
+                renderMemos();
+            };
+        }
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = e => {
+                        if(e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        saveMemo(audioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    document.getElementById('rec-btn').classList.add('recording');
+                    document.getElementById('rec-status').innerText = 'Recs in corso...';
+                    
+                    startTime = Date.now();
+                    timerInterval = setInterval(updateTimer, 1000);
+                } catch (err) {
+                    alert("Impossibile accedere al microfono. Controlla i permessi.");
+                }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                document.getElementById('rec-btn').classList.remove('recording');
+                document.getElementById('rec-status').innerText = 'Tocca per registrare';
+                clearInterval(timerInterval);
+                document.getElementById('timer').innerText = "00:00";
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const secs = String(elapsed % 60).padStart(2, '0');
+            document.getElementById('timer').innerText = `${mins}:${secs}`;
+        }
+
+        function saveMemo(blob) {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+                const base64Audio = reader.result;
+                const customTitle = document.getElementById('new-title').value.trim();
+                const tag = document.getElementById('new-tag').value;
+                const title = customTitle || `Memo del ${new Date().toLocaleDateString('it-IT')}`;
+
+                const tx = db.transaction("memos", "readwrite");
+                tx.objectStore("memos").add({ title, tag, audio: base64Audio, date: new Date().toISOString() });
+                
+                tx.oncomplete = () => {
+                    document.getElementById('new-title').value = '';
+                    renderMemos();
+                };
+            };
+        }
+
+        function renderMemos() {
+            if(!db) return;
+            const list = document.getElementById('memo-list');
+            list.innerHTML = '';
+
+            const tx = db.transaction("memos", "readonly");
+            tx.objectStore("memos").getAll().onsuccess = (e) => {
+                const memos = e.target.result.reverse();
+                if(memos.length === 0) {
+                    list.innerHTML = `<div style="font-size:13px; color:#8e8e93; text-align:center; padding:20px;">Nessun Recs salvato... Inizia ora a registrare!</div>`;
+                    return;
+                }
+
+                memos.forEach(memo => {
+                    const item = document.createElement('div');
+                    item.className = 'memo-item';
+                    item.innerHTML = `
+                        <div class="memo-header">
+                            <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                                <input type="text" class="memo-title-input" value="${memo.title}" onblur="updateMemoTitle(${memo.id}, this.value)">
+                            </div>
+                            <span class="memo-tag">${memo.tag || 'Personale'}</span>
+                            <button class="icon-btn" onclick="deleteMemo(${memo.id})">✖</button>
+                        </div>
+                        <audio controls src="${memo.audio}"></audio>
+                    `;
+                    list.appendChild(item);
+                });
+            };
+        }
+
+        function updateMemoTitle(id, newTitle) {
+            if(!newTitle.trim()) return;
+            const tx = db.transaction("memos", "readwrite");
+            const store = tx.objectStore("memos");
+            store.get(id).onsuccess = (e) => {
+                const memo = e.target.result;
+                if(memo) {
+                    memo.title = newTitle;
+                    store.put(memo);
+                }
+            };
+        }
+
+        function deleteMemo(id) {
+            const tx = db.transaction("memos", "readwrite");
+            tx.objectStore("memos").delete(id);
+            tx.oncomplete = () => renderMemos();
+        }
+
+        window.onload = () => {
+            initIndexedDB();
+        };
+    </script>
+
+<a class="home-return" href="index.html" aria-label="Torna alla Home" title="Torna alla Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg></a>
+</body>
+</html>

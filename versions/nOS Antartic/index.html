@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Home</title>
+<style>
+ :root{--green:#00ff3b;--bg:#000;--tile:#1b1b1d;--muted:#a5a5aa}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+html{overflow:hidden}
+body{height:100vh;height:100dvh;min-height:100svh;max-height:100dvh;max-width:560px;margin:0 auto;padding:calc(6px + env(safe-area-inset-top)) 16px calc(7px + env(safe-area-inset-bottom));display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none}
+.status{height:26px;min-height:26px;flex:0 0 26px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:800;letter-spacing:.5px;gap:8px}
+.brand{background:var(--green);color:#000;padding:5px 12px;border-radius:20px;box-shadow:0 0 15px #00ff3b35;white-space:nowrap}
+.fps{color:var(--green);white-space:nowrap}
+.hero{flex:0 0 auto;text-align:center;padding:clamp(12px,2.7dvh,25px) 0 clamp(8px,1.8dvh,17px)}
+.time{font-size:clamp(46px,12.5vw,82px);font-weight:650;letter-spacing:-3px;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 24px #00ff3b18;white-space:nowrap}
+.date{margin-top:clamp(7px,1.3dvh,12px);font-size:clamp(12px,3.6vw,15px);color:#b9b9bd;font-weight:500;text-transform:capitalize;letter-spacing:.3px}
+.rule{width:54px;height:3px;border-radius:5px;background:var(--green);margin:clamp(12px,2dvh,20px) auto 0;box-shadow:0 0 12px #00ff3b70}
+.apps{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:clamp(4px,1.35dvh,14px) clamp(10px,4vw,20px);padding:0 0 2px;align-items:stretch}
+.app{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,.9dvh,8px);text-decoration:none;color:white;min-width:0;min-height:0;overflow:hidden}
+.icon{width:clamp(58px,min(22vw,10.8dvh),104px);height:clamp(58px,min(22vw,10.8dvh),104px);flex:0 0 auto;border-radius:clamp(18px,6vw,27px);background:linear-gradient(145deg,#202023,#151517);border:1px solid #ffffff12;display:grid;place-items:center;color:var(--green);transition:transform .15s,background .15s;box-shadow:0 8px 22px #0008,inset 0 1px #ffffff08}
+.icon svg{width:42%;height:42%;filter:drop-shadow(0 0 7px #00ff3b42)}
+.app:active .icon{transform:scale(.94);background:#242428}
+.name{font-size:clamp(12px,3.5vw,14px);font-weight:600;text-align:center;overflow-wrap:anywhere;line-height:1.15;max-width:100%}
+.sub{font-size:11px;color:var(--muted);margin-top:-3px}
+/* Schermata Stile */
+#style-screen{display:none;position:fixed;inset:0;z-index:50;overflow-y:auto;background:rgba(0,0,0,.94);backdrop-filter:blur(18px);padding:calc(18px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));}
+#style-screen.open{display:block}
+.style-head{display:flex;align-items:center;gap:14px;margin:8px 0 12px}
+.back-btn{border:1px solid #ffffff18;background:#1b1b1d;color:var(--green);border-radius:15px;width:44px;height:44px;font-size:24px;cursor:pointer}
+.style-title{font-size:27px;font-weight:750;letter-spacing:-.7px}
+.style-desc{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:22px}
+.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.slot{border:1px solid #ffffff18;background:#1b1b1d;border-radius:20px;padding:9px;color:#fff;text-align:left;cursor:pointer;overflow:hidden}
+.slot:active{transform:scale(.98)}
+.slot-preview{height:clamp(90px,19dvh,125px);border-radius:13px;background:#080808 center/cover no-repeat;border:1px solid #ffffff12;position:relative;overflow:hidden}
+.slot-preview:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,#0008)}
+.slot-label{display:flex;justify-content:space-between;align-items:center;padding:11px 3px 3px;font-size:13px;font-weight:650;gap:6px}
+.slot-state{font-size:10px;color:var(--green);font-weight:800;letter-spacing:.5px}
+.style-foot{color:#85858b;font-size:11px;line-height:1.5;margin-top:20px}
+body.has-wallpaper{background-color:#000;background-position:center;background-size:cover;background-attachment:fixed}
+body.has-wallpaper:before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(#0007,#0009);pointer-events:none}
+body.has-wallpaper>.status,body.has-wallpaper>.hero,body.has-wallpaper>.apps{position:relative;z-index:1}
+body.has-wallpaper .icon{background:linear-gradient(145deg,#202023d9,#151517e8);backdrop-filter:blur(10px)}
+@media(max-width:350px){body{padding-left:12px;padding-right:12px}.apps{column-gap:8px}.name{font-size:12px}.slot-preview{height:clamp(82px,17dvh,105px)}#style-screen{padding-left:14px;padding-right:14px}}
+@media(max-height:620px){.hero{padding-top:8px;padding-bottom:6px}.time{font-size:clamp(43px,11vw,66px)}.date{margin-top:5px}.rule{margin-top:9px}.apps{gap:3px 10px}.icon{width:clamp(54px,min(19vw,9dvh),76px);height:clamp(54px,min(19vw,9dvh),76px)}.app{gap:3px}.sub{display:none}}
+</style>
+</head>
+<body>
+<header class="status"><span class="brand">NOS ANTARTIC</span><span><span id="small-time">16:27</span> &nbsp;•&nbsp; <span class="fps">100 FPS</span></span></header>
+<section class="hero" aria-label="Ora e data"><div class="time" id="time">16:27</div><div class="date" id="date">sabato 17 ottobre</div><div class="rule"></div></section>
+<main class="apps" aria-label="Le tue app">
+<a class="app" href="Calc.html"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M7 6h10M7 11h2m3 0h2m3 0h.1M7 15h2m3 0h2m3 0h.1M7 19h2m3 0h2"/></svg></span><span class="name">Calc</span><span class="sub">Calcolatrice</span></a>
+<a class="app" href="Calendar.html"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3 10h18M7 14h2m3 0h2m-7 3h2m3 0h2"/></svg></span><span class="name">Calendar</span><span class="sub">Calendario</span></a>
+<a class="app" href="Clock.html"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></span><span class="name">Clock</span><span class="sub">Orologio</span></a>
+<a class="app" href="Keys.html"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></svg></span><span class="name">Keys</span><span class="sub">Portachiavi</span></a>
+<a class="app" href="Note.html"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></span><span class="name">Note</span><span class="sub">Appunti</span></a>
+<a class="app" href="Recs.html"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="13" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8"/></svg></span><span class="name">Recs</span><span class="sub">Memo vocali</span></a>
+<a class="app" href="Writ%27r.html"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="m16.5 3.5 4 4L9 19l-5 1 1-5Z"/><path d="m14 6 4 4"/></svg></span><span class="name">Writ'r</span><span class="sub">Scrittura</span></a>
+<a class="app" href="#stile" id="style-app" aria-label="Apri Stile"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18h1.2a2.2 2.2 0 0 0 1.7-3.6 1.8 1.8 0 0 1 1.4-3h.9A3.8 3.8 0 0 0 21 10.6C21 6.4 17 3 12 3Z"/><circle cx="7.5" cy="10" r="1"/><circle cx="10" cy="6.8" r="1"/><circle cx="15" cy="7.5" r="1"/></svg></span><span class="name">Aspetto</span><span class="sub">Personalizza lo sfondo</span></a>
+</main>
+<section id="style-screen" aria-label="Personalizza sfondo" aria-hidden="true">
+  <div class="style-head"><button class="back-btn" id="style-back" aria-label="Torna alla Home">‹</button><div class="style-title">Stile</div></div>
+  <p class="style-desc">Scegli uno dei 6 sfondi per personalizzare la Home. La scelta viene salvata sul dispositivo.</p>
+  <div class="slots" id="wallpaper-slots">
+    <button class="slot" data-wallpaper="sfondo1.png"><div class="slot-preview" style="background-image:url('sfondo1.png')"></div><div class="slot-label"><span>Legacy</span><span class="slot-state"></span></div></button>
+    <button class="slot" data-wallpaper="sfondo2.png"><div class="slot-preview" style="background-image:url('sfondo2.png')"></div><div class="slot-label"><span>Legacy (neutral)</span><span class="slot-state"></span></div></button>
+    <button class="slot" data-wallpaper="sfondo3.png"><div class="slot-preview" style="background-image:url('sfondo3.png')"></div><div class="slot-label"><span>Antartic</span><span class="slot-state"></span></div></button>
+    <button class="slot" data-wallpaper="sfondo4.png"><div class="slot-preview" style="background-image:url('sfondo4.png')"></div><div class="slot-label"><span>Reflexes</span><span class="slot-state"></span></div></button>
+    <button class="slot" data-wallpaper="sfondo5.png"><div class="slot-preview" style="background-image:url('sfondo5.png')"></div><div class="slot-label"><span>Deformations</span><span class="slot-state"></span></div></button>
+    <button class="slot" data-wallpaper="sfondo6.png"><div class="slot-preview" style="background-image:url('sfondo6.png')"></div><div class="slot-label"><span>Shadow</span><span class="slot-state"></span></div></button>
+  </div>
+  <p class="style-desc">Per tornare allo sfondo predefinito del sistema di Antartic, clicca su <b>Rimuovi sfondo</b></p>
+  <button id="clear-wallpaper" style="margin-top:16px;width:100%;padding:14px;border-radius:15px;border:1px solid #ffffff20;background:#1b1b1d;color:#fff;font-weight:700;cursor:pointer">Rimuovi sfondo</button>
+</section>
+<script>
+const timeEl=document.getElementById('time'),smallTime=document.getElementById('small-time'),dateEl=document.getElementById('date');
+function updateClock(){const now=new Date();const time=new Intl.DateTimeFormat('it-IT',{hour:'2-digit',minute:'2-digit',hour12:false}).format(now);timeEl.textContent=time;smallTime.textContent=time;dateEl.textContent=new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long'}).format(now)}
+updateClock();setInterval(updateClock,1000);
+
+// Preferenze sfondo salvate in IndexedDB.
+const DB_NAME='NvidiaHomeDB', DB_VERSION=1, STORE='preferences';
+let homeDB=null, selectedWallpaper=null;
+const styleScreen=document.getElementById('style-screen');
+function openStyle(){styleScreen.classList.add('open');styleScreen.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';refreshSlots()}
+function closeStyle(){styleScreen.classList.remove('open');styleScreen.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+document.getElementById('style-app').addEventListener('click',e=>{e.preventDefault();openStyle()});
+document.getElementById('style-back').addEventListener('click',closeStyle);
+function openHomeDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB non disponibile'));return}const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'key'})};req.onsuccess=()=>{homeDB=req.result;resolve(homeDB)};req.onerror=()=>reject(req.error)})}
+function readWallpaper(){return new Promise((resolve,reject)=>{const req=homeDB.transaction(STORE,'readonly').objectStore(STORE).get('wallpaper');req.onsuccess=()=>resolve(req.result?req.result.value:null);req.onerror=()=>reject(req.error)})}
+function saveWallpaper(value){return new Promise((resolve,reject)=>{const tx=homeDB.transaction(STORE,'readwrite');if(value)tx.objectStore(STORE).put({key:'wallpaper',value});else tx.objectStore(STORE).delete('wallpaper');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
+function applyWallpaper(value){selectedWallpaper=value||null;if(selectedWallpaper){document.body.style.backgroundImage=`linear-gradient(#0007,#0009),url("${selectedWallpaper.replace(/["\\]/g,'')}")`;document.body.classList.add('has-wallpaper')}else{document.body.style.backgroundImage='';document.body.classList.remove('has-wallpaper')}refreshSlots()}
+function refreshSlots(){document.querySelectorAll('.slot').forEach(slot=>{const active=slot.dataset.wallpaper===selectedWallpaper;slot.style.borderColor=active?'var(--green)':'#ffffff18';slot.style.boxShadow=active?'0 0 14px #00ff3b30':'none';slot.querySelector('.slot-state').textContent=active?'●':''})}
+document.querySelectorAll('.slot').forEach(slot=>slot.addEventListener('click',async()=>{const file=slot.dataset.wallpaper;try{await saveWallpaper(file);applyWallpaper(file)}catch(err){alert('Non è stato possibile salvare lo sfondo in IndexedDB. Riprova nel browser.')}}));
+document.getElementById('clear-wallpaper').addEventListener('click',async()=>{try{await saveWallpaper(null);applyWallpaper(null)}catch(err){alert('Non è stato possibile aggiornare le preferenze.')}});
+openHomeDB().then(async()=>{applyWallpaper(await readWallpaper())}).catch(err=>console.warn('IndexedDB non disponibile:',err));
+
+</script>
+</body>
+</html>
